@@ -5,9 +5,9 @@ import (
   "os"
   "log"
   "path/filepath"
+  "bufio"
+  "strings"
 )
-
-var files []string
 
 func initialize(directoryPath string) {
 	fmt.Print("local functionalities of rcs")
@@ -33,7 +33,43 @@ func add(path string) {
       if err != nil {
         log.Fatal(err)
       }
-      files = append(files, p, "not commited")
+
+      files, err := os.Open("files.txt")
+      if err != nil {
+	      log.Fatal(err)
+      }
+
+      defer files.Close()
+
+      scanner := bufio.NewScanner(files)
+
+      fo, err := os.Create("files.txt")
+      if err != nil {
+          panic(err)
+      }
+      
+      defer fo.Close()
+    
+      for scanner.Scan() {
+        line := scanner.Text()
+        path := strings.Fields(line)
+        
+			  if path[0] == p {
+          _, err := fo.WriteString(path[0] + " notcommited\n") 
+          if err != nil {
+            panic(err)
+          }
+        } else {
+          _, err := fo.WriteString(line) 
+          if err != nil {
+            panic(err)
+          }
+        }
+      }
+
+      if err := scanner.Err(); err != nil {
+          log.Fatal(err)
+      }
     case mode.IsDir():
         err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
           list = append(list, path)
@@ -55,7 +91,43 @@ func add(path string) {
           if err != nil {
             log.Fatal(err)
           }
-          files = append(files, p, "not commited")
+
+          files, err := os.Open("files.txt")
+          if err != nil {
+            log.Fatal(err)
+          }
+
+          defer files.Close()
+
+          scanner := bufio.NewScanner(files)
+
+          fo, err := os.Create("files.txt")
+          if err != nil {
+              panic(err)
+          }
+          
+          defer fo.Close()
+        
+          for scanner.Scan() {
+            line := scanner.Text()
+            path := strings.Fields(line)
+            
+            if path[0] == p {
+              _, err := fo.WriteString(path[0] + " notcommited\n") 
+              if err != nil {
+                panic(err)
+              }
+            } else {
+              _, err := fo.WriteString(line) 
+              if err != nil {
+                panic(err)
+              }
+            }
+          }
+
+          if err := scanner.Err(); err != nil {
+              log.Fatal(err)
+          }
         case mode.IsDir():
           add(f)
       }
