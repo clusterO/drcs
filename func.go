@@ -40,7 +40,6 @@ func add(path string) {
       }
 
       defer files.Close()
-
       scanner := bufio.NewScanner(files)
 
       fo, err := os.Create("files.txt")
@@ -98,7 +97,6 @@ func add(path string) {
           }
 
           defer files.Close()
-
           scanner := bufio.NewScanner(files)
 
           fo, err := os.Create("files.txt")
@@ -152,7 +150,26 @@ func renmae(directoryPath string, newName string) {
 func clone() {}
 func logging() {}
 func diff() {}
-func status() {}
+
+func status() {
+  files, err := os.Open("files.txt")
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  defer files.Close()
+  scanner := bufio.NewScanner(files)
+
+  for scanner.Scan() {
+    line := scanner.Text()
+    path := strings.Fields(line)
+    
+    if path[1] == "notcommited\n" {
+      fmt.Println(line)
+    }
+  }
+}
+
 func pull(url string) {}
 func push(url string) {}
 func revert(commitHash string) {}
