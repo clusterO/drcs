@@ -12,6 +12,8 @@ import (
   "io"
   "flag"
   "github.com/udhos/equalfile"
+  "compress/zlib"
+  "bytes"
 )
 
 func main() {
@@ -428,11 +430,11 @@ func Revert(commitHash string, hashMap string) {
   scanner := bufio.NewScanner(files)
 
   for scanner.Scan() {
-    /* line := scanner.Text()
+    line := scanner.Text()
     p := strings.Fields(line)
-    filename := p[0] */
+    filename := p[0]
 
-    content := "" 
+    content := getFile(commitHash, filename)
     dumpFile, err := filepath.Abs("dump.txt")
     fo, err := os.Create(dumpFile)
       if err != nil {
@@ -441,7 +443,7 @@ func Revert(commitHash string, hashMap string) {
       
       defer fo.Close()
 
-      _, err = fo.WriteString(content) 
+      _, err = fo.WriteString(content)
           if err != nil {
             panic(err)
           }
@@ -470,3 +472,25 @@ func Revert(commitHash string, hashMap string) {
       _, err = io.Copy(destination, source)
   }          
 }
+
+func getFile(commitTag string, filename string) string {
+    path, err := os.Getwd()
+    if err != nil {
+        log.Println(err)
+    }
+
+    files := filepath.Join(path, "/dcrs/object/", commitTag)
+    hashmap := filepath.Join(files, "hashmap")
+    h := getHashNameFromHashmap(hashmap, filename)
+    
+    var b bytes.Buffer
+    content := zlib.NewWriter(&b)
+    p := filepath.Join(files, h)
+    fmt.Println(p)
+    r, err := zlib.NewReader(&b)
+    io.Copy(content, r)
+    r.Close() 
+
+    return ""
+}
+
