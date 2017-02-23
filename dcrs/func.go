@@ -11,7 +11,7 @@ import (
   "crypto/sha1"
   "io"
   "flag"
-  "github.com/udhos/equalfile"
+  "equalfile"
 )
 
 func main() {
@@ -472,10 +472,33 @@ func Revert(commitHash string, hashMap string) {
 }
 
 func merge(directory string) {
-  path, err := os.Getwd()
-  if err != nil {
-    log.Println(err)
-  }
+    commits := GetCommits(directory)
+    print(commits)
+    mycommits := GetAllCommits()
+    commitsToFetch := Difference(commits, mycommits)
+    
+    path, err := os.Getwd()
+    if err != nil {
+      log.Println(err)
+    }
 
-  Dircmp(path, directory)
+    f, err := os.OpenFile(path + "/dcrs/" + "status.txt",
+	  os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+    if err != nil {
+      log.Println(err)
+    }
+    defer f.Close()
+    
+    for i := 0; i < len(commitsToFetch); i++ {
+      k := strings.Fields(commitsToFetch[i])
+      committag := k[1]  
+      print(committag)
+      content := GetCommitsContent(directory, committag)
+      UncompressAndWrite(committag, content)
+      print(commitsToFetch[i])
+
+      if _, err := f.WriteString(commitsToFetch[i] + "\n"); err != nil {
+        log.Println(err)
+      }
+    }
 }

@@ -10,6 +10,8 @@ import (
 	"io"
 	"bufio"
 	"strings"
+	"io/ioutil"
+	"dcrs/zip"
 )
 
 // GetFile return file path
@@ -114,4 +116,118 @@ func Append(slice []Fileattr, data Fileattr) []Fileattr {
 
 	}
 	return slice
+}
+
+// GetAllCommits return all commits
+func GetAllCommits() []string {
+	path, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
+
+	files, err := os.Open(path + "/dcrs/" + "status.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer files.Close()
+	scanner := bufio.NewScanner(files)
+
+	var content []string 
+	for scanner.Scan() {
+		line := scanner.Text()
+		_ = append(content, line)
+	}
+	
+	return content
+}
+
+// CompressAndSend returns content
+func CompressAndSend(commit string) string {
+	path, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
+
+	tempdir, err := ioutil.TempDir("", "tempdir")
+	archivename := filepath.Join(tempdir, commit + ".zip")
+	zip.RecursiveZip(filepath.Join(path, commit), archivename)
+
+	files, err := os.Open(archivename)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer files.Close()
+	scanner := bufio.NewScanner(files)
+
+	content := ""
+	for scanner.Scan() {
+		line := scanner.Text()
+		content += line + "\n"
+	}
+
+	return content
+}
+
+// UncompressAndWrite extract content
+func UncompressAndWrite(commit string, content string) {
+	tempdir, err := ioutil.TempDir("", "tempdir")
+	archivename := filepath.Join(tempdir, commit + ".zip")
+
+	file, err := os.Stat(archivename)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	
+	switch mode := file.Mode(); {
+		case mode.IsRegular():
+			archive, err := os.Create(archivename)
+			if err != nil {
+				panic(err)
+			}
+				
+			defer archive.Close()
+
+			_, err = archive.WriteString(content) 
+				if err != nil {
+					panic(err)
+				}
+	}
+
+	path, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
+
+	extractto := filepath.Join(path, commit)
+	os.MkdirAll(extractto, os.ModePerm)
+	zip.Unzip(extractto, archivename)
+}
+
+// GetCommits return commits
+func GetCommits(d string) []string {
+    return GetAllCommits()
+}
+
+// GetCommitsContent return content from commit file
+func GetCommitsContent(d string, c string) string {
+    return CompressAndSend(c)
+}
+
+// Difference Set A - B
+func Difference(a, b []string) (diff []string) {
+	m := make(map[string]bool)
+
+	for _, item := range b {
+			m[item] = true
+	}
+
+	for _, item := range a {
+			if _, ok := m[item]; !ok {
+					diff = append(diff, item)
+			}
+	}
+	return
 }
