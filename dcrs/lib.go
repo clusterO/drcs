@@ -7,11 +7,12 @@ import (
 	"compress/zlib"
 	"path/filepath"
 	"fmt"
-	"io"
+	"io" 
 	"bufio"
 	"strings"
 	"io/ioutil"
 	"dcrs/zip"
+	"go-three-way-merge"
 )
 
 // GetFile return file path
@@ -221,13 +222,70 @@ func Difference(a, b []string) (diff []string) {
 	m := make(map[string]bool)
 
 	for _, item := range b {
-			m[item] = true
+		m[item] = true
 	}
 
 	for _, item := range a {
-			if _, ok := m[item]; !ok {
-					diff = append(diff, item)
-			}
+		if _, ok := m[item]; !ok {
+			diff = append(diff, item)
+		}
 	}
+
 	return
+}
+
+// GetFileList return list of files
+func GetFileList(commitTag string) []string {
+	path, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
+
+	files, err := os.Open(filepath.Join(path, commitTag, "hashmap.txt"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer files.Close()
+	scanner := bufio.NewScanner(files)
+
+	var list []string
+	for scanner.Scan() {
+		line := scanner.Text()
+		p := strings.Fields(line)
+		_ = append(list, p[0], p[1])
+	}
+
+	return list
+}
+
+// Data merge output structure
+type Data struct {
+    mdContent string
+	conflict int
+	merged int
+}
+
+
+// MergeMethod use 3 base method to merge files
+func MergeMethod(base string, mine string, other string) Data {
+    m := Merge(base, mine, other)
+    mg := m.merge_groups()
+    conflicts := 0
+	flag := 0
+	
+    for g := range mg {
+        if g[0] == "conflict" {
+            conflicts++
+		}
+
+        if g[0] == "a" {
+            flag++
+		}
+	}
+
+    merged := strings.Join(m.merge_lines(`start_marker = "\n!!!--Conflict--!!!\n!--Your version--", mid_marker = "\n!--Other version--", end_marker = "\n!--End conflict--\n`), "")
+	r := Data{mdContent: merged, conflict: conflicts, merged: flag}
+
+	return r
 }
