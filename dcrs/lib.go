@@ -289,3 +289,44 @@ func MergeMethod(base string, mine string, other string) Data {
 
 	return r
 }
+
+// GetFileName returns file name
+func GetFileName(objectdir string, commitTag string) {
+	files, err := os.Open(filepath.Join(objectdir, commitTag))
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    defer files.Close()
+	scanner := bufio.NewScanner(files)
+
+	var list []string
+	for scanner.Scan() {
+		line := scanner.Text()
+		p := strings.Fields(line)
+		_ = append(list, p[0])
+	}
+	
+	return list
+}
+
+// GetFileLoc returns file location
+func GetFileLoc(objectdir string, commitTag string, filename string) {
+	files, err := os.Open(filepath.Join(objectdir, commitTag))
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    defer files.Close()
+	scanner := bufio.NewScanner(files)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		p := strings.Fields(line)
+
+		if p[1] == filename:
+			return p[0]
+	}
+
+	return nil
+}
