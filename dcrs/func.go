@@ -514,8 +514,8 @@ func Merge(directory string) {
 	}
 
   	parentFileList := GetFileList(strings.Fields(parentCommit)[1])
-	myFileList := GetFileList(strings.Fields(mycommits[0])[1])
-	otherFileList := GetFileList(strings.Fields(commits[0])[1])
+	  myFileList := GetFileList(strings.Fields(mycommits[0])[1])
+	  otherFileList := GetFileList(strings.Fields(commits[0])[1])
   	flag := 0
   
 	for elem := range myFileList {
