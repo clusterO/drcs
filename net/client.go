@@ -1,10 +1,13 @@
 package net
 
-import ()
+import (
+	"bufio"
+	"fmt"
+	"net"
+)
 
 func getVersions(result string) {
-	d := result.callRemote("getVersions", "all")
-	d.addCallback(gotVersions)
+	// remote callback
 }
 
 func gotVersions(result string) {

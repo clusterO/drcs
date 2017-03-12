@@ -1,17 +1,17 @@
 package dcrs
 
 import (
-	"fmt"
-	"os"
-	"log"
-	"path/filepath"
 	"bufio"
+	"crypto/sha1"
+	"equalfile"
+	"flag"
+	"fmt"
+	"io"
+	"log"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
-	"crypto/sha1"
-	"io"
-	"flag"
-	"equalfile"
 )
 
 func main(dirc string) {
@@ -21,8 +21,8 @@ func main(dirc string) {
 	var status string
 	var log string
 	var diff string
-	var pull string 
-	var revert string 
+	var pull string
+	var revert string
 
 	flag.StringVar(&init, "init", "", "initialize the repo")
 	flag.StringVar(&init, "i", "", "initialize the repo (shorthand)")
@@ -47,51 +47,51 @@ func main(dirc string) {
 
 	flag.StringVar(&revert, "revert", "", "revert current directory to an old commit")
 	flag.StringVar(&revert, "r", "", "revert current directory to an old commit (shorthand)")
-    
+
 	path, err := os.Getwd()
 	if err != nil {
 		log.Println(err)
 	}
 
 	directory := dirc
-	statusfile := filepath.Abs(filepath.Join(directory, "dcrs","status.txt"))
-	userfile := filepath.Abs(filepath.Join(directory,"dcrs","username.txt"))
-	trackingfile := filepath.Abs(filepath.Join(directory,"dcrs","files.txt"))
-	objectdir := filepath.Abs(filepath.Join(directory,"dcrs","object"))
-	dcrs := filepath.Abs(filepath.Join(directory,"dcrs"))
+	statusfile := filepath.Abs(filepath.Join(directory, "dcrs", "status.txt"))
+	userfile := filepath.Abs(filepath.Join(directory, "dcrs", "username.txt"))
+	trackingfile := filepath.Abs(filepath.Join(directory, "dcrs", "files.txt"))
+	objectdir := filepath.Abs(filepath.Join(directory, "dcrs", "object"))
+	dcrs := filepath.Abs(filepath.Join(directory, "dcrs"))
 	newhashmap := "hashmap.txt"
-	commitfiles := filepath.Abs(filepath.Join(directory,"dcrs","object","commitfiles"))
-	
+	commitfiles := filepath.Abs(filepath.Join(directory, "dcrs", "object", "commitfiles"))
+
 	flag.Parse()
 
 	if init != "" {
 		Init(path)
 	} else if commit != "" {
-    	Commit(commit)
+		Commit(commit)
 	} else if add != "" {
-    	Add(add, path)
-    } else if status != "" {
-        Status(path)
-    } else if log != "" {
-        Log(path)
-    } else if log != "" {
-        Diff(diff, diff, path)
-    } else if pull != "" {
-        Pull()
-    } else if revert != "" {
-        Revert()
-    } 
+		Add(add, path)
+	} else if status != "" {
+		Status(path)
+	} else if log != "" {
+		Log(path)
+	} else if log != "" {
+		Diff(diff, diff, path)
+	} else if pull != "" {
+		Pull()
+	} else if revert != "" {
+		Revert()
+	}
 }
 
 // Init initialize repository
 func Init(path string) {
-	err = os.MkdirAll(path + "/dcrs", os.ModePerm)
+	err = os.MkdirAll(path+"/dcrs", os.ModePerm)
 	if err != nil {
-    log.Fatal(err)
+		log.Fatal(err)
 	}
-	
-	var username string 
-	var email string 
+
+	var username string
+	var email string
 	println("enter username: ")
 	fmt.Scan("%s", &username)
 	println("enter email: ")
@@ -101,242 +101,241 @@ func Init(path string) {
 	if err != nil {
 		panic(err)
 	}
-		
+
 	defer config.Close()
 
-	_, err = config.WriteString(username) 
-		if err != nil {
-			panic(err)
-		}
+	_, err = config.WriteString(username)
+	if err != nil {
+		panic(err)
+	}
 
 	files, err := os.Create(path + "/dcrs/" + "files.txt")
 	if err != nil {
 		panic(err)
 	}
-		
+
 	defer files.Close()
 }
 
 // Add files to tracking system
 func Add(filename string, path string) {
-  var list []string
+	var list []string
 
-  file, err := os.Stat(filename)
-  if err != nil {
-      fmt.Println(err)
-      return
-  }
+	file, err := os.Stat(filename)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-  switch mode := file.Mode(); {
-    case mode.IsRegular():
-      p, err := filepath.Abs(filename)
-      if err != nil {
-        log.Fatal(err)
-      }
+	switch mode := file.Mode(); {
+	case mode.IsRegular():
+		p, err := filepath.Abs(filename)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-      files, err := os.Open(path + "/dcrs/" + "files.txt")
-      if err != nil {
-	      log.Fatal(err)
-      }
+		files, err := os.Open(path + "/dcrs/" + "files.txt")
+		if err != nil {
+			log.Fatal(err)
+		}
 
-      defer files.Close()
-      scanner := bufio.NewScanner(files)
+		defer files.Close()
+		scanner := bufio.NewScanner(files)
 
-      fo, err := os.Create(path + "/dcrs/" + "files.txt")
-      if err != nil {
-          panic(err)
-      }
-      
-      defer fo.Close()
-    
-      for scanner.Scan() {
-        line := scanner.Text()
-        path := strings.Fields(line)
-        
-		if path[0] == p {
-          _, err := fo.WriteString(path[0] + " notcommited\n") 
-          if err != nil {
-            panic(err)
-          }
-        } else {
-          _, err := fo.WriteString(line) 
-          if err != nil {
-            panic(err)
-          }
-        }
-      }
+		fo, err := os.Create(path + "/dcrs/" + "files.txt")
+		if err != nil {
+			panic(err)
+		}
 
-      if err := scanner.Err(); err != nil {
-          log.Fatal(err)
-      }
-    case mode.IsDir():
-        err := filepath.Walk(filename, func(p string, info os.FileInfo, err error) error {
-          list = append(list, p)
-          return nil
-      })
-      
-      if err != nil {
-          panic(err)
-      }
+		defer fo.Close()
 
-      for _, f := range list {
-        fi, err := os.Stat(f)
-        if err != nil {
-            fmt.Println(err)
-            return
-        }
+		for scanner.Scan() {
+			line := scanner.Text()
+			path := strings.Fields(line)
 
-        switch mode := fi.Mode(); {
-        case mode.IsRegular():
-          p, err := filepath.Abs(fi.Name())
-          if err != nil {
-            log.Fatal(err)
-          }
+			if path[0] == p {
+				_, err := fo.WriteString(path[0] + " notcommited\n")
+				if err != nil {
+					panic(err)
+				}
+			} else {
+				_, err := fo.WriteString(line)
+				if err != nil {
+					panic(err)
+				}
+			}
+		}
 
-          files, err := os.Open(path + "/dcrs/" + "files.txt")
-          if err != nil {
-            log.Fatal(err)
-          }
+		if err := scanner.Err(); err != nil {
+			log.Fatal(err)
+		}
+	case mode.IsDir():
+		err := filepath.Walk(filename, func(p string, info os.FileInfo, err error) error {
+			list = append(list, p)
+			return nil
+		})
 
-          defer files.Close()
-          scanner := bufio.NewScanner(files)
+		if err != nil {
+			panic(err)
+		}
 
-          fo, err := os.Create(path + "/dcrs/" + "files.txt")
-          if err != nil {
-              panic(err)
-          }
-          
-          defer fo.Close()
-        
-          for scanner.Scan() {
-            line := scanner.Text()
-            path := strings.Fields(line)
-            
-            if path[0] == p {
-              _, err := fo.WriteString(path[0] + " notcommited\n") 
-              if err != nil {
-                panic(err)
-              }
-            } else {
-              _, err := fo.WriteString(line) 
-              if err != nil {
-                panic(err)
-              }
-            }
-          }
+		for _, f := range list {
+			fi, err := os.Stat(f)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
 
-          if err := scanner.Err(); err != nil {
-              log.Fatal(err)
-          }
-        case mode.IsDir():
-          Add(f)
-      }
-    }
-  }
+			switch mode := fi.Mode(); {
+			case mode.IsRegular():
+				p, err := filepath.Abs(fi.Name())
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				files, err := os.Open(path + "/dcrs/" + "files.txt")
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				defer files.Close()
+				scanner := bufio.NewScanner(files)
+
+				fo, err := os.Create(path + "/dcrs/" + "files.txt")
+				if err != nil {
+					panic(err)
+				}
+
+				defer fo.Close()
+
+				for scanner.Scan() {
+					line := scanner.Text()
+					path := strings.Fields(line)
+
+					if path[0] == p {
+						_, err := fo.WriteString(path[0] + " notcommited\n")
+						if err != nil {
+							panic(err)
+						}
+					} else {
+						_, err := fo.WriteString(line)
+						if err != nil {
+							panic(err)
+						}
+					}
+				}
+
+				if err := scanner.Err(); err != nil {
+					log.Fatal(err)
+				}
+			case mode.IsDir():
+				Add(f)
+			}
+		}
+	}
 }
 
 // Commit changes
 func Commit(message string, path string) (int64, error) {
-  files, err := os.Open(path + "/dcrs/" + "config.txt")
-  if err != nil {
-    log.Fatal(err)
-  }
+	files, err := os.Open(path + "/dcrs/" + "config.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-  defer files.Close()
-  scanner := bufio.NewScanner(files)
-  username := scanner.Text()
-  dateandtime := time.Now().String()
+	defer files.Close()
+	scanner := bufio.NewScanner(files)
+	username := scanner.Text()
+	dateandtime := time.Now().String()
 
-  hash := sha1.New()
-  hash.Write([]byte(username + dateandtime))
-  hashmap := hash.Sum(nil)
-  
-  files, err = os.Open(path + "/dcrs/" + "files.txt")
-  if err != nil {
-    log.Fatal(err)
-  }
+	hash := sha1.New()
+	hash.Write([]byte(username + dateandtime))
+	hashmap := hash.Sum(nil)
 
-  defer files.Close()
-  scanner = bufio.NewScanner(files)
+	files, err = os.Open(path + "/dcrs/" + "files.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-  for scanner.Scan() {
-    line := scanner.Text()
-    path := strings.Fields(line)
+	defer files.Close()
+	scanner = bufio.NewScanner(files)
 
-    if(path[1] == "notcommited\n" || path[1] == "commited\n") {
-      src := path[0]
-      p, err := filepath.Abs("dcrs")
-      dst := p + "/object/" + string(hashmap)
+	for scanner.Scan() {
+		line := scanner.Text()
+		path := strings.Fields(line)
 
-      _, err = os.Stat(src)
-      if err != nil {
-        return 0, err
-      }
+		if path[1] == "notcommited\n" || path[1] == "commited\n" {
+			src := path[0]
+			p, err := filepath.Abs("dcrs")
+			dst := p + "/object/" + string(hashmap)
 
-      source, err := os.Open(src)
-      if err != nil {
-        return 0, err
-      }
+			_, err = os.Stat(src)
+			if err != nil {
+				return 0, err
+			}
 
-      defer source.Close()
+			source, err := os.Open(src)
+			if err != nil {
+				return 0, err
+			}
 
-      destination, err := os.Create(dst)
-      if err != nil {
-        return 0, err
-      }
+			defer source.Close()
 
-      defer destination.Close()
-      _, err = io.Copy(destination, source)
-    }
-  }
+			destination, err := os.Create(dst)
+			if err != nil {
+				return 0, err
+			}
 
-  p, err := filepath.Abs("dcrs")
-  fo, err := os.Create(p + "/object/" + string(hashmap) + "/message.txt")
-  if err != nil {
-      panic(err)
-  }
-  
-  defer fo.Close()
+			defer destination.Close()
+			_, err = io.Copy(destination, source)
+		}
+	}
 
-  r, err := fo.WriteString(message) 
-  if err != nil {
-    fmt.Println(r)
-    panic(err)
-  }
+	p, err := filepath.Abs("dcrs")
+	fo, err := os.Create(p + "/object/" + string(hashmap) + "/message.txt")
+	if err != nil {
+		panic(err)
+	}
 
-  fo, err = os.Create(path + "/dcrs/" + "files.txt")
-  if err != nil {
-      panic(err)
-  }
-  
-  defer fo.Close()
+	defer fo.Close()
 
-  for scanner.Scan() {
-    line := scanner.Text()
-    path := strings.Fields(line)
-    
-    _, err := fo.WriteString(path[0] + "commited\n") 
-    if err != nil {
-      panic(err)
-    }
-  }
+	r, err := fo.WriteString(message)
+	if err != nil {
+		fmt.Println(r)
+		panic(err)
+	}
 
-  return 0, nil
+	fo, err = os.Create(path + "/dcrs/" + "files.txt")
+	if err != nil {
+		panic(err)
+	}
+
+	defer fo.Close()
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		path := strings.Fields(line)
+
+		_, err := fo.WriteString(path[0] + "commited\n")
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return 0, nil
 }
 
 // Rename a file
 func Rename(directoryPath string, newName string) {
-  if _, err := os.Stat(newName)
-  err == nil {
-      fmt.Println(newName, " directory exists")
-	  } else if os.IsNotExist(err) {
-      err = os.Rename(directoryPath, newName)
-      if err != nil {
-        log.Fatal(err)
-      }
-	  } else {
-      
-	  }
+	if _, err := os.Stat(newName); err == nil {
+		fmt.Println(newName, " directory exists")
+	} else if os.IsNotExist(err) {
+		err = os.Rename(directoryPath, newName)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+
+	}
 }
 
 // Clone a repository
@@ -344,70 +343,70 @@ func Clone() {}
 
 // Log list all commits
 func Log(path string) {
-  files, err := os.Open(path + "/dcrs/" + "config.txt")
-  if err != nil {
-    log.Fatal(err)
-  }
+	files, err := os.Open(path + "/dcrs/" + "config.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-  defer files.Close()
-  scanner := bufio.NewScanner(files)
-  username := scanner.Text()
+	defer files.Close()
+	scanner := bufio.NewScanner(files)
+	username := scanner.Text()
 
-  p, err := filepath.Abs("dcrs")
-  dst := p + "/object/"
-  var list []string
-  err = filepath.Walk(dst, func(p string, info os.FileInfo, err error) error {
-    list = append(list, p)
-    return nil
-  })
+	p, err := filepath.Abs("dcrs")
+	dst := p + "/object/"
+	var list []string
+	err = filepath.Walk(dst, func(p string, info os.FileInfo, err error) error {
+		list = append(list, p)
+		return nil
+	})
 
-  if err != nil {
-      panic(err)
-  }
+	if err != nil {
+		panic(err)
+	}
 
-  for _, f := range list {
-    fi, err := os.Stat(f)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
+	for _, f := range list {
+		fi, err := os.Stat(f)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
-    moddate := fi.ModTime()
-    fmt.Println("Commit tag: ", fi.Name())
-    fmt.Println("Author: ", username)
-    fmt.Println("Time Stamp: ", moddate)
-    fmt.Println()
-  }
+		moddate := fi.ModTime()
+		fmt.Println("Commit tag: ", fi.Name())
+		fmt.Println("Author: ", username)
+		fmt.Println("Time Stamp: ", moddate)
+		fmt.Println()
+	}
 }
 
 // Diff show difference between two versions
 func Diff(oldCommit string, newCommit string) bool {
-    oldFile, _ := filepath.Abs("dcrs/object/" + oldCommit)
-    newFile, _ := filepath.Abs("dcrs/object/" + newCommit)
+	oldFile, _ := filepath.Abs("dcrs/object/" + oldCommit)
+	newFile, _ := filepath.Abs("dcrs/object/" + newCommit)
 	cmp := equalfile.New(nil, equalfile.Options{})
-    equal, _ := cmp.CompareFile(oldFile, newFile)
+	equal, _ := cmp.CompareFile(oldFile, newFile)
 
-    return equal
+	return equal
 }
 
 // Status show project status
 func Status(path string) {
-  files, err := os.Open(path + "/dcrs/" + "files.txt")
-  if err != nil {
-    log.Fatal(err)
-  }
+	files, err := os.Open(path + "/dcrs/" + "files.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-  defer files.Close()
-  scanner := bufio.NewScanner(files)
+	defer files.Close()
+	scanner := bufio.NewScanner(files)
 
-  for scanner.Scan() {
-    line := scanner.Text()
-    path := strings.Fields(line)
-    
-    if path[1] == "notcommited\n" {
-      fmt.Println(line)
-    }
-  }
+	for scanner.Scan() {
+		line := scanner.Text()
+		path := strings.Fields(line)
+
+		if path[1] == "notcommited\n" {
+			fmt.Println(line)
+		}
+	}
 }
 
 // Pull changes from repository
@@ -420,133 +419,133 @@ func Push(url string) {}
 
 // Revert changes
 func Revert(commitHash string, hashMap string, string path) {
-  files, err := os.Open(path + "/dcrs/object/" + commitHash + "/" + hashMap)
-  if err != nil {
-    log.Fatal(err)
-  }
+	files, err := os.Open(path + "/dcrs/object/" + commitHash + "/" + hashMap)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-  defer files.Close()
-  scanner := bufio.NewScanner(files)
+	defer files.Close()
+	scanner := bufio.NewScanner(files)
 
-  for scanner.Scan() {
-    line := scanner.Text()
-    p := strings.Fields(line)
-    filename := p[0]
+	for scanner.Scan() {
+		line := scanner.Text()
+		p := strings.Fields(line)
+		filename := p[0]
 
-    content := GetFile(commitHash, filename)
-    dumpFile, err := filepath.Abs("dump.txt")
-    fo, err := os.Create(dumpFile)
-      if err != nil {
-          panic(err)
-      }
-      
-      defer fo.Close()
+		content := GetFile(commitHash, filename)
+		dumpFile, err := filepath.Abs("dump.txt")
+		fo, err := os.Create(dumpFile)
+		if err != nil {
+			panic(err)
+		}
 
-      _, err = fo.WriteString(content)
-          if err != nil {
-            panic(err)
-          }
+		defer fo.Close()
 
-        src := dumpFile
-      dst := path
+		_, err = fo.WriteString(content)
+		if err != nil {
+			panic(err)
+		}
 
-      _, err = os.Stat(src)
-      if err != nil {
-        return
-      }
+		src := dumpFile
+		dst := path
 
-      source, err := os.Open(src)
-      if err != nil {
-        return
-      }
+		_, err = os.Stat(src)
+		if err != nil {
+			return
+		}
 
-      defer source.Close()
+		source, err := os.Open(src)
+		if err != nil {
+			return
+		}
 
-      destination, err := os.Create(dst)
-      if err != nil {
-        return
-      }
+		defer source.Close()
 
-      defer destination.Close()
-      _, err = io.Copy(destination, source)
-  }          
+		destination, err := os.Create(dst)
+		if err != nil {
+			return
+		}
+
+		defer destination.Close()
+		_, err = io.Copy(destination, source)
+	}
 }
 
 // Merge files
 func Merge(directory string) {
-    commits := GetCommits(directory)
-    print(commits)
-    mycommits := GetAllCommits()
-    commitsToFetch := Difference(commits, mycommits)
-    
-    path, err := os.Getwd()
-    if err != nil {
-      log.Println(err)
-    }
+	commits := GetCommits(directory)
+	print(commits)
+	mycommits := GetAllCommits()
+	commitsToFetch := Difference(commits, mycommits)
 
-    f, err := os.OpenFile(path + "/dcrs/" + "status.txt",
-	  os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-    if err != nil {
-      log.Println(err)
-    }
-    defer f.Close()
-    
-    for i := 0; i < len(commitsToFetch); i++ {
-      k := strings.Fields(commitsToFetch[i])
-      committag := k[1]  
-      print(committag)
-      content := GetCommitsContent(directory, committag)
-      UncompressAndWrite(committag, content)
-      print(commitsToFetch[i])
-
-      if _, err := f.WriteString(commitsToFetch[i] + "\n"); err != nil {
-        log.Println(err)
-      }
+	path, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
 	}
-  
+
+	f, err := os.OpenFile(path+"/dcrs/"+"status.txt",
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Println(err)
+	}
+	defer f.Close()
+
+	for i := 0; i < len(commitsToFetch); i++ {
+		k := strings.Fields(commitsToFetch[i])
+		committag := k[1]
+		print(committag)
+		content := GetCommitsContent(directory, committag)
+		UncompressAndWrite(committag, content)
+		print(commitsToFetch[i])
+
+		if _, err := f.WriteString(commitsToFetch[i] + "\n"); err != nil {
+			log.Println(err)
+		}
+	}
+
 	parentCommit := ""
 	for i := 0; i < len(commits); i++ {
 		for _, v := range mycommits {
 			if v == commits[i] {
-			parentCommit := commits[i]
+				parentCommit := commits[i]
 			}
 		}
 	}
 
-  	parentFileList := GetFileList(strings.Fields(parentCommit)[1])
-	  myFileList := GetFileList(strings.Fields(mycommits[0])[1])
-	  otherFileList := GetFileList(strings.Fields(commits[0])[1])
-  	flag := 0
-  
+	parentFileList := GetFileList(strings.Fields(parentCommit)[1])
+	myFileList := GetFileList(strings.Fields(mycommits[0])[1])
+	otherFileList := GetFileList(strings.Fields(commits[0])[1])
+	flag := 0
+
 	for elem := range myFileList {
 		for temp := range otherFileList {
 			if myFileList[elem] == otherFileList[temp] {
 				dicts := MergeMethod(GetFile(strings.Fields(parentCommit)[1], myFileList[elem]), GetFile(strings.Fields(mycommits[0])[1], myFileList[elem]), GetFile(strings.Fields(commits[0])[1], myFileList[elem]))
-				
+
 				fo, err := os.Create(path + "/dcrs/" + myFileList[elem])
 				if err != nil {
 					panic(err)
 				}
 
 				defer fo.Close()
-		
-				_, err = fo.WriteString(dicts.mdContent) 
+
+				_, err = fo.WriteString(dicts.mdContent)
 				if err != nil {
 					panic(err)
 				}
 
 				if dicts.conflict == 0 && dicts.merged != 0 {
-					print("Merged "+ myFileList[elem] + "\n")
+					print("Merged " + myFileList[elem] + "\n")
 				} else {
 					print("Merged with conflicts in " + myFileList[elem] + " not commiting.Please commit after manually changing")
-					flag=1
+					flag = 1
 				}
 			}
-    	}
-	  
+		}
+
 	}
 
-	if(flag == 0) {
+	if flag == 0 {
 		Commit("auto-merged successfull")
 	}
 }
