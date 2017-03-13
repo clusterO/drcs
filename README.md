@@ -16,3 +16,9 @@ between the peers, and the crs.
 - http://git-scm.com
 - http://wiki.bazaar.canonical.com
 - https://tom.preston-werner.com/2009/05/19/the-git-parable.html
+
+#### external libraries
+
+* https://github.com/udhos/equalfile
+* https://github.com/charlesvdv/go-three-way-merge
+
