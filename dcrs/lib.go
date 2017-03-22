@@ -318,7 +318,6 @@ type Data struct {
 
 // MergeMethod use 3 base method to merge files
 func MergeMethod(base string, mine string, other string) Data {
-	print(base,"\n", mine, "\n", other, "\n")
     m := Merge(base, mine, other)
     mg := m.merge_groups()
     conflicts := 0
@@ -410,4 +409,8 @@ func UpdateModifyTime(trackingFile string) {
 			panic(err)
 		}
 	}
+}
+
+func GetLastCommit(commits []string) string {
+	return ""
 }
