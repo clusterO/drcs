@@ -12,7 +12,8 @@ import (
 	"strings"
 	"io/ioutil"
 	"dcrs/zip"
-	"go-three-way-merge"
+	merge "go-three-way-merge"
+	"time"
 )
 
 // GetFile return file path
@@ -150,7 +151,7 @@ func CompressAndSend(commit string) string {
 		log.Println(err)
 	}
 
-	archivename := CompressAll(commit)
+	archivename := CompressAll(commit, path)
 
 	files, err := os.Open(archivename)
 	if err != nil {	
@@ -170,20 +171,21 @@ func CompressAndSend(commit string) string {
 }
 
 // CompressAll recursively zip all files
-func CompressAll(commits string, commitDir string) {
+func CompressAll(commits string, commitDir string) string {
 	tempdir, err := ioutil.TempDir("", "tempdir")
 	commitdir := filepath.Join(tempdir, commitDir)
 
-	err := os.Mkdir(commitdir); err {
+	err = os.Mkdir(commitdir, os.ModePerm)
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	archivename := filepath.Join(tempdir, commit + ".zip")
+	archivename := filepath.Join(tempdir, commits + ".zip")
 
 	file, err := os.Stat(archivename)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return ""
 	}
 	
 	switch mode := file.Mode(); {
@@ -195,29 +197,32 @@ func CompressAll(commits string, commitDir string) {
 				
 			defer fp.Close()
 	
-			_, err = fp.WriteString(content) 
+			_, err = fp.WriteString(commits)
 			if err != nil {
 				panic(err)
 			}
 	}
 
-	extractto := filepath.Join(objectdir, commit)
-	os.MkdirAll(extractto)
+	extractto := filepath.Join(commitDir, commits)
+	os.MkdirAll(extractto, os.ModePerm)
 	zip.Unzip(extractto, archivename)
 
-	for i := range commits {
-		filenames = GetFileName(i)
-		_, err = io.Copy(filepath.Join(objectdir,i), tempdir)
+	for _ = range commits {
+		filenames := GetFileName(commitDir, commits)
+		// file := filepath.Join(commitDir, commits)
+		// _, err = io.Copy(file, tempdir)
 
 		for fn := range filenames {
-			h = GetFileLoc(i, fn)
-			floc = filepath.Join(commitfiles, h)
-			_, err = io.Copy(floc, commitdir)
+			h := GetFileLoc(commitDir, commits, filenames[fn])
+			_ = filepath.Join(commits, h)
+			// _, err = io.Copy(floc, commitdir)
 		}
 	}
 
-	archivename = ioutil.TempFile("", ".zip")
+	_, err = ioutil.TempFile("", ".zip")
 	zip.RecursiveZip(tempdir, archivename)
+
+	return archivename
 }
 
 // UncompressAndWrite extract content
@@ -318,29 +323,27 @@ type Data struct {
 
 // MergeMethod use 3 base method to merge files
 func MergeMethod(base string, mine string, other string) Data {
-    m := Merge(base, mine, other)
-    mg := m.merge_groups()
+    m, _, _ := merge.Merge(base, mine, other)
     conflicts := 0
 	flag := 0
-	
-    for g := range mg {
-        if g[0] == "conflict" {
-            conflicts++
-		}
 
-        if g[0] == "a" {
-            flag++
-		}
+	if m == "conflict" {
+		conflicts++
 	}
 
-    merged := strings.Join(m.merge_lines(`start_marker = "\n!!!--Conflict--!!!\n!--Your version--", mid_marker = "\n!--Other version--", end_marker = "\n!--End conflict--\n`), "")
-	r := Data{mdContent: merged, conflict: conflicts, merged: flag}
+	if m == "a" {
+		flag++
+	}
+
+    // merged := strings.Join(m.merge_lines(`start_marker = "\n!!!--Conflict--!!!\n!--Your version--", mid_marker = "\n!--Other version--", end_marker = "\n!--End conflict--\n`), "")
+	merged := ""
+    r := Data{mdContent: merged, conflict: conflicts, merged: flag}
 
 	return r
 }
 
 // GetFileName returns file name
-func GetFileName(objectdir string, commitTag string) {
+func GetFileName(objectdir string, commitTag string) []string {
 	files, err := os.Open(filepath.Join(objectdir, commitTag))
     if err != nil {
         log.Fatal(err)
@@ -360,7 +363,7 @@ func GetFileName(objectdir string, commitTag string) {
 }
 
 // GetFileLoc returns file location
-func GetFileLoc(objectdir string, commitTag string, filename string) {
+func GetFileLoc(objectdir string, commitTag string, filename string) string {
 	files, err := os.Open(filepath.Join(objectdir, commitTag))
     if err != nil {
         log.Fatal(err)
@@ -378,11 +381,11 @@ func GetFileLoc(objectdir string, commitTag string, filename string) {
 		}
 	}
 
-	return nil
+	return ""
 }
 
 func UpdateModifyTime(trackingFile string) {
-	files, err := os.Open(trackingfile)
+	files, err := os.Open(trackingFile)
     if err != nil {
         log.Fatal(err)
     }
@@ -390,7 +393,7 @@ func UpdateModifyTime(trackingFile string) {
     defer files.Close()
 	scanner := bufio.NewScanner(files)
 
-	fp, err := os.Create(trackingfile)
+	fp, err := os.Create(trackingFile)
 	if err != nil {
 		panic(err)
 	}
@@ -401,8 +404,8 @@ func UpdateModifyTime(trackingFile string) {
 		line := scanner.Text()
 		p := strings.Fields(line)
 
-		name = p[0]
-		status = p[1]
+		name := p[0]
+		status := p[1]
 
 		_, err = fp.WriteString(name + " " + status + " " + time.Now().String() + "\n") 
 		if err != nil {

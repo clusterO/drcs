@@ -23,12 +23,12 @@ func listen() {
 	}
 }
 
-func remoteGetCommits(directory string) {
+func remoteGetCommits(directory string) []string {
 	return dcrs.GetAllCommits()
 }
 
-func remoteGetCommitsContent(directory string, commit string) {
-	return dcrs.CompressAndSend()
+func remoteGetCommitsContent(directory string, commit string) string {
+	return dcrs.CompressAndSend("")
 }
 
 func handleConnection(c net.Conn) {
