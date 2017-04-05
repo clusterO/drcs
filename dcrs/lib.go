@@ -17,35 +17,26 @@ import (
 )
 
 // GetFile return file path
-func GetFile(commitTag string, filename string) string {
-    path, err := os.Getwd()
-    if err != nil {
-        log.Println(err)
-    }
-
-    files := filepath.Join(path, "/dcrs/object/", commitTag)
+func GetFile(dir string, commitTag string, filename string) string {
+    files := filepath.Join(dir, "obj", commitTag)
     hashmap := filepath.Join(files, "hashmap")
     h := GetHashNameFromHashmap(hashmap, filename)
     
     var b bytes.Buffer
     content := zlib.NewWriter(&b)
     p := filepath.Join(files, h)
-    fmt.Println(p)
-    r, err := zlib.NewReader(&b)
+    r, _ := zlib.NewReader(&b)
     io.Copy(content, r)
     r.Close() 
 
-    return ""
+    return p
 }
 
 // GetHashNameFromHashmap returns name
 func GetHashNameFromHashmap(hashfile string, name string) string {
-    files, err := os.Open(hashfile)
-    if err != nil {
+    files, err := os.Open(hashfile); if err != nil {
         log.Fatal(err)
-    }
-
-    defer files.Close()
+    }; defer files.Close()
     scanner := bufio.NewScanner(files)
 
     for scanner.Scan() { 
@@ -93,6 +84,7 @@ func LeftVisit(path string, f os.FileInfo, _ error) error {
 	attr.fileinfo = f
 
 	leftList = Append(leftList, attr)
+
 	return nil
 }
 
@@ -104,6 +96,7 @@ func RightVisit(path string, f os.FileInfo, _ error) error {
 	attr.fileinfo = f
 
 	rightList = Append(rightList, attr)
+
 	return nil
 }
 
@@ -117,22 +110,15 @@ func Append(slice []Fileattr, data Fileattr) []Fileattr {
 			slice[l] = data
 
 	}
+
 	return slice
 }
 
 // GetAllCommits return all commits
-func GetAllCommits() []string {
-	path, err := os.Getwd()
-	if err != nil {
-		log.Println(err)
-	}
-
-	files, err := os.Open(path + "/dcrs/" + "status.txt")
-	if err != nil {
+func GetAllCommits(dir string) []string {
+	files, err := os.Open(filepath.Join(dir, "status.txt")); if err != nil {
 		log.Fatal(err)
-	}
-
-	defer files.Close()
+	}; defer files.Close()
 	scanner := bufio.NewScanner(files)
 
 	var content []string 
@@ -145,20 +131,11 @@ func GetAllCommits() []string {
 }
 
 // CompressAndSend returns content
-func CompressAndSend(commit string) string {
-	path, err := os.Getwd()
-	if err != nil {
-		log.Println(err)
-	}
-
-	archivename := CompressAll(commit, path)
-
-	files, err := os.Open(archivename)
-	if err != nil {	
+func CompressAndSend(dir string, commit string) string {
+	archivename := CompressAll(commit, dir)
+	files, err := os.Open(archivename); if err != nil {
 		log.Fatal(err)
-	}
-
-	defer files.Close()
+	}; defer files.Close()
 	scanner := bufio.NewScanner(files)
 
 	content := ""
@@ -174,31 +151,21 @@ func CompressAndSend(commit string) string {
 func CompressAll(commits string, commitDir string) string {
 	tempdir, err := ioutil.TempDir("", "tempdir")
 	commitdir := filepath.Join(tempdir, commitDir)
-
-	err = os.Mkdir(commitdir, os.ModePerm)
-	if err != nil {
+	err = os.Mkdir(commitdir, os.ModePerm); if err != nil {
 		log.Fatal(err)
 	}
-
 	archivename := filepath.Join(tempdir, commits + ".zip")
-
-	file, err := os.Stat(archivename)
-	if err != nil {
+	file, err := os.Stat(archivename); if err != nil {
 		fmt.Println(err)
 		return ""
 	}
 	
 	switch mode := file.Mode(); {
 		case !mode.IsRegular():
-			fp, err := os.Create(archivename)
-			if err != nil {
+			fp, err := os.Create(archivename); if err != nil {
 				panic(err)
-			}
-				
-			defer fp.Close()
-	
-			_, err = fp.WriteString(commits)
-			if err != nil {
+			}; defer fp.Close()
+			_, err = fp.WriteString(commits); if err != nil {
 				panic(err)
 			}
 	}
@@ -226,49 +193,37 @@ func CompressAll(commits string, commitDir string) string {
 }
 
 // UncompressAndWrite extract content
-func UncompressAndWrite(commit string, content string) {
+func UncompressAndWrite(dir string, commit string, content string) {
 	tempdir, err := ioutil.TempDir("", "tempdir")
 	archivename := filepath.Join(tempdir, commit + ".zip")
-
-	file, err := os.Stat(archivename)
-	if err != nil {
+	file, err := os.Stat(archivename); if err != nil {
 		fmt.Println(err)
 		return
 	}
 	
 	switch mode := file.Mode(); {
 		case mode.IsRegular():
-			archive, err := os.Create(archivename)
-			if err != nil {
+			archive, err := os.Create(archivename); if err != nil {
 				panic(err)
-			}
-				
-			defer archive.Close()
-
-			_, err = archive.WriteString(content) 
-				if err != nil {
+			}; defer archive.Close()
+			_, err = archive.WriteString(content); if err != nil {
 					panic(err)
 				}
 	}
 
-	path, err := os.Getwd()
-	if err != nil {
-		log.Println(err)
-	}
-
-	extractto := filepath.Join(path, commit)
+	extractto := filepath.Join(dir, commit)
 	os.MkdirAll(extractto, os.ModePerm)
 	zip.Unzip(extractto, archivename)
 }
 
 // GetCommits return commits
-func GetCommits(d string) []string {
-    return GetAllCommits()
+func GetCommits(dir string) []string {
+    return GetAllCommits(dir)
 }
 
 // GetCommitsContent return content from commit file
-func GetCommitsContent(d string, c string) string {
-    return CompressAndSend(c)
+func GetCommitsContent(dir string, c string) string {
+    return CompressAndSend(dir, c)
 }
 
 // Difference Set A - B
@@ -289,18 +244,10 @@ func Difference(a, b []string) (diff []string) {
 }
 
 // GetFileList return list of files
-func GetFileList(commitTag string) []string {
-	path, err := os.Getwd()
-	if err != nil {
-		log.Println(err)
-	}
-
-	files, err := os.Open(filepath.Join(path, commitTag, "hashmap.txt"))
-	if err != nil {
+func GetFileList(dir string, commitTag string) []string {
+	files, err := os.Open(filepath.Join(dir, commitTag, "hashmap.txt")); if err != nil {
 		log.Fatal(err)
-	}
-
-	defer files.Close()
+	}; defer files.Close()
 	scanner := bufio.NewScanner(files)
 
 	var list []string
@@ -319,7 +266,6 @@ type Data struct {
 	conflict int
 	merged int
 }
-
 
 // MergeMethod use 3 base method to merge files
 func MergeMethod(base string, mine string, other string) Data {
@@ -344,12 +290,9 @@ func MergeMethod(base string, mine string, other string) Data {
 
 // GetFileName returns file name
 func GetFileName(objectdir string, commitTag string) []string {
-	files, err := os.Open(filepath.Join(objectdir, commitTag))
-    if err != nil {
+	files, err := os.Open(filepath.Join(objectdir, commitTag)); if err != nil {
         log.Fatal(err)
-    }
-
-    defer files.Close()
+    }; defer files.Close()
 	scanner := bufio.NewScanner(files)
 
 	var list []string
@@ -364,12 +307,9 @@ func GetFileName(objectdir string, commitTag string) []string {
 
 // GetFileLoc returns file location
 func GetFileLoc(objectdir string, commitTag string, filename string) string {
-	files, err := os.Open(filepath.Join(objectdir, commitTag))
-    if err != nil {
+	files, err := os.Open(filepath.Join(objectdir, commitTag)); if err != nil {
         log.Fatal(err)
-    }
-
-    defer files.Close()
+    }; defer files.Close()
 	scanner := bufio.NewScanner(files)
 
 	for scanner.Scan() {
@@ -385,20 +325,14 @@ func GetFileLoc(objectdir string, commitTag string, filename string) string {
 }
 
 func UpdateModifyTime(trackingFile string) {
-	files, err := os.Open(trackingFile)
-    if err != nil {
+	files, err := os.Open(trackingFile); if err != nil {
         log.Fatal(err)
-    }
-
-    defer files.Close()
+    }; defer files.Close()
 	scanner := bufio.NewScanner(files)
 
-	fp, err := os.Create(trackingFile)
-	if err != nil {
+	fp, err := os.Create(trackingFile); if err != nil {
 		panic(err)
-	}
-		
-	defer fp.Close()
+	}; defer fp.Close()
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -407,8 +341,7 @@ func UpdateModifyTime(trackingFile string) {
 		name := p[0]
 		status := p[1]
 
-		_, err = fp.WriteString(name + " " + status + " " + time.Now().String() + "\n") 
-		if err != nil {
+		_, err = fp.WriteString(name + " " + status + " " + time.Now().String() + "\n"); if err != nil {
 			panic(err)
 		}
 	}
