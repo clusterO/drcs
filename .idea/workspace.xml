@@ -20,11 +20,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b458b2d8-052a-47cf-aaa2-10812d052e25" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dcrs/func.go" beforeDir="false" afterPath="$PROJECT_DIR$/dcrs/func.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dcrs/lib.go" beforeDir="false" afterPath="$PROJECT_DIR$/dcrs/lib.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/net/client.go" beforeDir="false" afterPath="$PROJECT_DIR$/net/client.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/net/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/net/server.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,13 +76,12 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Go Build.go build main.go" />
       <item itemvalue="Go Build.go build dcrs" />
       <item itemvalue="Go Build.go build func.go" />
+      <item itemvalue="Go Build.go build main.go" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Build.go build main.go" />
         <item itemvalue="Go Build.go build func.go" />
         <item itemvalue="Go Build.go build dcrs" />
       </list>
@@ -127,22 +123,22 @@
       <screen x="0" y="22" width="1366" height="746" />
     </state>
     <state x="392" y="82" width="571" height="615" key="#go_build_func.go/0.22.1366.746@0.22.1366.746" timestamp="1611358325057" />
-    <state width="1328" height="300" key="GridCell.Tab.0.bottom" timestamp="1611358932886">
+    <state width="1328" height="300" key="GridCell.Tab.0.bottom" timestamp="1611416994219">
       <screen x="0" y="22" width="1366" height="746" />
     </state>
-    <state width="1328" height="300" key="GridCell.Tab.0.bottom/0.22.1366.746@0.22.1366.746" timestamp="1611358932886" />
-    <state width="1328" height="300" key="GridCell.Tab.0.center" timestamp="1611358932885">
+    <state width="1328" height="300" key="GridCell.Tab.0.bottom/0.22.1366.746@0.22.1366.746" timestamp="1611416994219" />
+    <state width="1328" height="300" key="GridCell.Tab.0.center" timestamp="1611416994218">
       <screen x="0" y="22" width="1366" height="746" />
     </state>
-    <state width="1328" height="300" key="GridCell.Tab.0.center/0.22.1366.746@0.22.1366.746" timestamp="1611358932885" />
-    <state width="1328" height="300" key="GridCell.Tab.0.left" timestamp="1611358932884">
+    <state width="1328" height="300" key="GridCell.Tab.0.center/0.22.1366.746@0.22.1366.746" timestamp="1611416994218" />
+    <state width="1328" height="300" key="GridCell.Tab.0.left" timestamp="1611416994217">
       <screen x="0" y="22" width="1366" height="746" />
     </state>
-    <state width="1328" height="300" key="GridCell.Tab.0.left/0.22.1366.746@0.22.1366.746" timestamp="1611358932884" />
-    <state width="1328" height="300" key="GridCell.Tab.0.right" timestamp="1611358932885">
+    <state width="1328" height="300" key="GridCell.Tab.0.left/0.22.1366.746@0.22.1366.746" timestamp="1611416994217" />
+    <state width="1328" height="300" key="GridCell.Tab.0.right" timestamp="1611416994219">
       <screen x="0" y="22" width="1366" height="746" />
     </state>
-    <state width="1328" height="300" key="GridCell.Tab.0.right/0.22.1366.746@0.22.1366.746" timestamp="1611358932885" />
+    <state width="1328" height="300" key="GridCell.Tab.0.right/0.22.1366.746@0.22.1366.746" timestamp="1611416994219" />
     <state x="428" y="65" width="509" height="660" key="find.popup" timestamp="1611358070999">
       <screen x="0" y="22" width="1366" height="746" />
     </state>

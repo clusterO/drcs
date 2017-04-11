@@ -20,10 +20,9 @@ func Dial(ip string, port string) {
 	}
 
 	fmt.Fprintf(conn, "GET / HTTP/1.0\r\n\r\n")
-	status, err := bufio.NewReader(conn).ReadString('\n')
+	status, _ := bufio.NewReader(conn).ReadString('\n')
 	fmt.Print("status: ", status)
 }
 
 func Connect(ip string, port string, direcotry string, op bool) {
-
 }

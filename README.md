@@ -1,44 +1,50 @@
-This project try to implement DRCS & DDS systems in golang, the goal after reaching a stable 
-implementation is to benchmark these systems with similar ones implemented with other languages.
+# Distributed Revision Control System (DRCS) & Dynamic Deployment System
 
-### DRCS : Distributed Revision Control System 
+This project aims to implement the DRCS and DDS systems in Go programming language. The primary goal is to develop a stable implementation of these systems and subsequently benchmark them against similar systems implemented in other programming languages.
 
-Track software revisions and allow different networks to share work on a project.
-dcrs use peer to peer approach, each peer has a working copy of the codebase, copies
-are synchronized by patches exchange between peers.
+## DRCS: Distributed Revision Control System
 
-I'll try here to implement the basic features of a dcrs, commit, push, pull, view history,
-merging and reverting changes using golang.
+The DRCS is a system designed to track software revisions and enable different networks to collaborate on a project. It follows a peer-to-peer approach where each peer maintains a working copy of the codebase. The copies are synchronized through the exchange of patches between peers.
 
-The project will have to main subsystems, one for networking, that implement the communication
-between the peers, and the crs.
-
-#### refs
-
-- http://en.wikipedia.org/wiki/Distributed_revision_control
-- http://git-scm.com
-- http://wiki.bazaar.canonical.com
-- https://tom.preston-werner.com/2009/05/19/the-git-parable.html
-
-#### external libraries
-
-* https://github.com/udhos/equalfile
-* https://github.com/charlesvdv/go-three-way-merge
+In this project, we will focus on implementing the fundamental features of a DRCS, including commit, push, pull, viewing history, merging, and reverting changes using the Go programming language.
 
 ### DDS : Dynamic Deployment System
 
 A tool for automated deployment and build.
 
-#### refs
+#### Refs
 
-* https://www.wikiwand.com/en/Software_deployment
+- [Distributed version control](http://en.wikipedia.org/wiki/Distributed_revision_control)
+- [Git](http://git-scm.com)
+- [The Git Parable](https://tom.preston-werner.com/2009/05/19/the-git-parable.html)
+- [Software deployment](https://www.wikiwand.com/en/Software_deployment)
 
-###### TODO
-[] Refactor
-[] Unit tests
-[] Add only modified files
-[] Store SHA1 as tree
-[] Add manual conflicts resolution
-[] Implement network connect
-[] Store files as blobs
-[] Implement branches & branches merging
+#### External libraries
+
+- [equalfile](https://github.com/udhos/equalfile)
+- [three way merge](https://github.com/charlesvdv/go-three-way-merge)
+
+#### TODO
+
+- [_] Functions test & refactor
+- [_] Add only modified files
+- [_] Store SHA1 as tree
+- [_] Add manual conflicts resolution
+- [_] Implement network connect
+- [_] Store files as blobs
+- [_] Implement branches & branches mergin
+- [_] Unit tests
+
+## Installation
+
+Instructions for installing and setting up the project will be provided in the project's documentation.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+Please refer to the [LICENSE](LICENSE) file for more details.
+
+## Contribution
+
+Contributions to this project are welcome. If you encounter any issues or have suggestions for improvements, please feel free to open an issue or submit a pull request.

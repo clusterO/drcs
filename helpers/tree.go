@@ -15,10 +15,9 @@
 // sending their contents through a channel
 // to a third goroutine that compares them.
 
-package main
+package helpers
 
 import (
-	"fmt"
 	"math/rand"
 )
 
@@ -89,12 +88,4 @@ func insert(t *Tree, v int) *Tree {
 	}
 	t.Right = insert(t.Right, v)
 	return t
-}
-
-func main() {
-	t1 := New(100, 1)
-	fmt.Println(Compare(t1, New(100, 1)), "Same Contents")
-	fmt.Println(Compare(t1, New(99, 1)), "Differing Sizes")
-	fmt.Println(Compare(t1, New(100, 2)), "Differing Values")
-	fmt.Println(Compare(t1, New(101, 2)), "Dissimilar")
 }

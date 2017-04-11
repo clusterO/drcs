@@ -1,15 +1,15 @@
 package zip
 
 import (
-    "archive/zip"
-    "io"
-    "os"
-    "path/filepath"
-    "strings"
-    "fmt"
+	"archive/zip"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
-// RecursiveZip zip a directory
+// zip a directory
 func RecursiveZip(pathToZip, destinationPath string) error {
     destinationFile, err := os.Create(destinationPath)
     if err != nil {
@@ -48,7 +48,7 @@ func RecursiveZip(pathToZip, destinationPath string) error {
     return nil
 }
 
-// Unzip file to specific dst
+// Unzip file to specific destination
 func Unzip(src string, dest string) ([]string, error) {
 
     var filenames []string

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"dcrs/dcrs"
+	"DCRS/dcrs"
 )
 
 func main() {

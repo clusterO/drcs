@@ -7,14 +7,16 @@ import (
 )
 
 func listen() {
-	ln, err := net.Listen("tcp", ":9999"); if err != nil {
+	ln, err := net.Listen("tcp", ":818"); if err != nil {
 		fmt.Print("error: ", err)
 	}
 
-	for {
+	for 
+	{
 		conn, err := ln.Accept(); if err != nil {
 			fmt.Print("error: ", err)
 		}
+
 		go handleConnection(conn)
 	}
 }
