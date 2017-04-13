@@ -26,7 +26,7 @@ A tool for automated deployment and build.
 
 #### TODO
 
-- [_] Functions test & refactor
+- [x] Functions test & refactor
 - [_] Add only modified files
 - [_] Store SHA1 as tree
 - [_] Add manual conflicts resolution

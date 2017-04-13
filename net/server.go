@@ -6,8 +6,8 @@ import (
 	"net"
 )
 
-func listen() {
-	ln, err := net.Listen("tcp", ":818"); if err != nil {
+func Listen() {
+	ln, err := net.Listen("tcp4", "127.0.0.1:8181"); if err != nil {
 		fmt.Print("error: ", err)
 	}
 
@@ -19,16 +19,6 @@ func listen() {
 
 		go handleConnection(conn)
 	}
-}
-
-func remoteGetCommits(directory string) string {
-	return  ""
-	// dcrs.GetAllCommits()
-}
-
-func remoteGetCommitsContent(directory string, commit string) string {
-	return ""
-	// dcrs.CompressAndSend("")
 }
 
 func handleConnection(c net.Conn) {

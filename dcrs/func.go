@@ -65,15 +65,15 @@ func Cli() {
 			diffs := strings.Fields(diff)
 			Diff(dir, diffs[0], diffs[1])
 		case pull != "":
-			Pull(pull)
+			Pull(pull, dir)
 		case revert != "":
 			commitHash := revert
 			hashMap := revert
 			Revert(commitHash, hashMap, path)
 		case push != "":
-			Push(push)
+			Push(push, dir)
 		case clone != "":
-			Clone(clone)
+			Clone(clone, dir)
 	}
 }
 
@@ -348,10 +348,10 @@ func Rename(directoryPath string, newName string) {
 	}
 }
 
-func Clone(target string) {
+func Clone(target string, dir string) {
 	directory := filepath.Base(target)
 	Init(directory, "")
-	Pull(target)
+	Pull(target, dir)
 }
 
 func Log(dir string) {
@@ -412,18 +412,18 @@ func Status(dir string) {
 	}
 }
 
-func Pull(url string) {
+func Pull(url string, dir string) {
 	ip := strings.Split(url, ":")[0]
 	port := strings.Split(strings.Split(url, ":")[1], "/")[0]
-	directory := strings.Split(strings.Split(url, ":")[1], "/")[1]
-	network.Connect(ip, port, directory, true)
+	packageName := strings.Split(strings.Split(url, ":")[1], "/")[1]
+	network.Connect(ip, port, dir, packageName, true)
 }
 
-func Push(url string) {
+func Push(url string, dir string) {
 	ip := strings.Split(url, ":")[0]
 	port := strings.Split(strings.Split(url, ":")[1], "/")[0]
-	directory := strings.Split(strings.Split(url, ":")[1], "/")[1]
-	network.Connect(ip, port, directory, false)
+	packageName := strings.Split(strings.Split(url, ":")[1], "/")[1]
+	network.Connect(ip, port, dir, packageName, true)
 }
 
 func Revert(commitHash string, hashMap string, dir string) {
