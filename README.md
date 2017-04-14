@@ -30,7 +30,7 @@ A tool for automated deployment and build.
 - [_] Add only modified files
 - [_] Store SHA1 as tree
 - [_] Add manual conflicts resolution
-- [_] Implement network connect
+- [x] Implement network connect
 - [_] Store files as blobs
 - [_] Implement branches & branches mergin
 - [_] Unit tests
