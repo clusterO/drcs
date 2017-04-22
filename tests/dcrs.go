@@ -68,3 +68,53 @@ func TestAdd(t *testing.T) {
 		t.Errorf("Expected line not found in tracker file: %s", expectedLine)
 	}
 }
+
+func TestCommit(t *testing.T) {
+	dir := "/path/to/directory" // Replace with the actual directory path
+
+	// Create a temporary file for testing
+	tempFile, err := ioutil.TempFile("", "testfile.txt")
+	if err != nil {
+		t.Fatalf("Failed to create temporary file: %v", err)
+	}
+	defer os.Remove(tempFile.Name())
+
+	// Write some content to the temporary file
+	content := "Test content"
+	err = ioutil.WriteFile(tempFile.Name(), []byte(content), 0644)
+	if err != nil {
+		t.Fatalf("Failed to write content to temporary file: %v", err)
+	}
+
+	// Call the Commit function
+	message := "Test commit"
+	_, err = dcrs.Commit(message, dir)
+	if err != nil {
+		t.Fatalf("Failed to commit changes: %v", err)
+	}
+
+	// Perform assertions to verify the expected changes after committing
+
+	// Check if the temporary file exists in the committed directory
+	committedFilePath := filepath.Join(dir, ".obj", "committed_directory", tempFile.Name())
+	_, err = os.Stat(committedFilePath)
+	if os.IsNotExist(err) {
+		t.Errorf("Expected file %s to exist in committed directory, but it does not", committedFilePath)
+	}
+
+	// Check if the message file exists in the committed directory
+	messageFilePath := filepath.Join(dir, ".obj", "committed_directory", "message.txt")
+	_, err = os.Stat(messageFilePath)
+	if os.IsNotExist(err) {
+		t.Errorf("Expected file %s to exist in committed directory, but it does not", messageFilePath)
+	}
+
+	// Read the content of the message file and compare with the expected message
+	messageContent, err := ioutil.ReadFile(messageFilePath)
+	if err != nil {
+		t.Fatalf("Failed to read message file: %v", err)
+	}
+	if string(messageContent) != message {
+		t.Errorf("Expected message content '%s', but got '%s'", message, string(messageContent))
+	}
+}
