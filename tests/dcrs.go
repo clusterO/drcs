@@ -118,3 +118,25 @@ func TestCommit(t *testing.T) {
 		t.Errorf("Expected message content '%s', but got '%s'", message, string(messageContent))
 	}
 }
+
+func TestPull(t *testing.T) {
+	dir := "/path/to/directory"
+	url := "127.0.0.1:8181/packageName"
+
+	// Perform the pull operation
+	dcrs.Pull(url, dir)
+
+	// Assert the expected results
+	// ...
+}
+
+func TestPush(t *testing.T) {
+	dir := "/path/to/directory"
+	url := "127.0.0.1:8181/packageName"
+
+	// Perform the push operation
+	dcrs.Push(url, dir)
+
+	// Assert the expected results
+	// ...
+}
