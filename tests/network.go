@@ -2,7 +2,10 @@ package tests
 
 import (
 	network "DCRS/net"
+	"bufio"
+	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -89,4 +92,42 @@ func TestConnect(t *testing.T) {
 	if _, err := os.Stat(uploadedFile2Path); os.IsNotExist(err) {
 		t.Error("Failed to upload file2.txt:", err)
 	}
+}
+
+func TestListen(t *testing.T) {
+	// Start a test server
+	go func() {
+		err := network.Listen()
+		if err != nil {
+			t.Errorf("Listen error: %s", err)
+		}
+	}()
+
+	// Connect to the test server
+	conn, err := net.Dial("tcp4", "127.0.0.1:8181")
+	if err != nil {
+		t.Errorf("Failed to connect to the test server: %s", err)
+	}
+
+	// Send a sample message
+	message := "Hello, server!"
+	_, err = fmt.Fprintf(conn, message)
+	if err != nil {
+		t.Errorf("Failed to send message: %s", err)
+	}
+
+	// Receive the response from the server
+	response, err := bufio.NewReader(conn).ReadString('\n')
+	if err != nil {
+		t.Errorf("Failed to read response: %s", err)
+	}
+
+	// Check if the response is as expected
+	expectedResponse := "Received: Hello, server!\n"
+	if response != expectedResponse {
+		t.Errorf("Unexpected response from server. Expected: %s, Got: %s", expectedResponse, response)
+	}
+
+	// Close the connection
+	conn.Close()
 }

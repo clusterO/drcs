@@ -7,6 +7,7 @@ import (
 )
 
 func Listen() {
+	// should return when err
 	ln, err := net.Listen("tcp4", "127.0.0.1:8181"); if err != nil {
 		fmt.Print("error: ", err)
 	}
