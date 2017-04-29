@@ -33,7 +33,17 @@ A tool for automated deployment and build.
 - [x] Implement network connect
 - [_] Store files as blobs
 - [_] Implement branches & branches mergin
-- [_] Unit tests
+- [x] Unit tests
+
+#### Usage
+
+```shell
+go run . -help
+go run . -init y
+go run . -add <file | directory>
+go run . -commit "commit message"
+go run . -clone localhost:8181/<package name>
+```
 
 ## Installation
 

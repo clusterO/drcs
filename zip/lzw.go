@@ -1,5 +1,10 @@
 package zip
 
+import (
+	"fmt"
+	"strconv"
+)
+
 type LZW struct {
 	dictionary map[string]int
 	nextCode   int
@@ -37,8 +42,8 @@ func (lzw *LZW) Decompress(input []int) string {
 	previous := ""
 	for _, code := range input {
 		current := ""
-		if val, ok := lzw.dictionary[code]; ok {
-			current = val
+		if val, ok := lzw.dictionary[fmt.Sprint(code)]; ok {
+			current = fmt.Sprint(val)
 		} else if code == lzw.nextCode {
 			current = previous + string(previous[0])
 		} else {
@@ -46,7 +51,7 @@ func (lzw *LZW) Decompress(input []int) string {
 		}
 		output += current
 		if previous != "" {
-			lzw.dictionary[lzw.nextCode] = previous + string(current[0])
+			lzw.dictionary[fmt.Sprint(lzw.nextCode)], _ = strconv.Atoi(previous + string(current[0]))
 			lzw.nextCode++
 		}
 		previous = current
