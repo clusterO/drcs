@@ -15,3 +15,4 @@ between the peers, and the crs.
 - http://en.wikipedia.org/wiki/Distributed_revision_control
 - http://git-scm.com
 - http://wiki.bazaar.canonical.com
+- https://tom.preston-werner.com/2009/05/19/the-git-parable.html
