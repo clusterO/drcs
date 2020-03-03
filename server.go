@@ -1,4 +1,4 @@
-package network
+package dcrs
 
 import (
 	"fmt"
@@ -6,10 +6,6 @@ import (
   "bufio"
   "io"
 )
-
-func main() {
-  listen()
-}
 
 func dial() {
   conn, err := net.Dial("tcp", "127.0.0.1:8787")
