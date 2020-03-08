@@ -7,15 +7,20 @@ import (
   "path/filepath"
   "bufio"
   "strings"
+  "time"
+  "crypto/sha1"
+  "io"
 )
 
 func initialize(directoryPath string) {
-	fmt.Print("local functionalities of rcs")
-
-	err := os.MkdirAll(directoryPath, os.ModePerm)
+	err := os.MkdirAll(directoryPath + "/init", os.ModePerm)
 	if err != nil {
     log.Fatal(err)
-	}
+  }
+  
+  var username string
+  println("enter username: ")
+  fmt.Scan("%s", &username)
 }
 
 func add(path string) {
@@ -131,6 +136,74 @@ func add(path string) {
       }
     }
   }
+}
+
+func commit(message string) (int64, error) {
+  username := ""
+  dateandtime := time.Now().String()
+
+  hash := sha1.New()
+  hash.Write([]byte(username + dateandtime))
+  hashmap := hash.Sum(nil)
+  
+  files, err := os.Open("files.txt")
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  defer files.Close()
+  scanner := bufio.NewScanner(files)
+
+  for scanner.Scan() {
+    line := scanner.Text()
+    path := strings.Fields(line)
+
+    if(path[1] == "commited\n") {
+      src := path[0]
+      p, err := filepath.Abs("init")
+      dst := p + "/object/" + string(hashmap)
+
+      sourceFileStat, err := os.Stat(src)
+      if err != nil {
+        return 0, err
+      }
+
+      if !sourceFileStat.Mode().IsRegular() {
+        return 0, fmt.Errorf("%s is not a regular file", src)
+      }
+
+      source, err := os.Open(src)
+      if err != nil {
+        return 0, err
+      }
+      defer source.Close()
+
+      destination, err := os.Create(dst)
+      if err != nil {
+        return 0, err
+      }
+
+      defer destination.Close()
+      nBytes, err := io.Copy(destination, source)
+      return nBytes, err
+    }
+  }
+
+  p, err := filepath.Abs("init")
+  fo, err := os.Create(p + "/object/" + string(hashmap) + "/message.txt")
+  if err != nil {
+      panic(err)
+  }
+  
+  defer fo.Close()
+
+  r, err := fo.WriteString(message) 
+  if err != nil {
+    fmt.Println(r)
+    panic(err)
+  }
+
+  return 0, nil
 }
 
 func renmae(directoryPath string, newName string) {
