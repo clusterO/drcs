@@ -322,7 +322,47 @@ func Rename(directoryPath string, newName string) {
 // Clone a repository
 func Clone() {}
 // Log list all commits
-func Log() {}
+func Log() {
+  path, err := os.Getwd()
+  if err != nil {
+    log.Println(err)
+  }
+
+  files, err := os.Open(path + "/dcrs/" + "config.txt")
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  defer files.Close()
+  scanner := bufio.NewScanner(files)
+  username := scanner.Text()
+
+  p, err := filepath.Abs("dcrs")
+  dst := p + "/object/"
+  var list []string
+  err = filepath.Walk(dst, func(p string, info os.FileInfo, err error) error {
+    list = append(list, p)
+    return nil
+  })
+
+  if err != nil {
+      panic(err)
+  }
+
+  for _, f := range list {
+    fi, err := os.Stat(f)
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+
+    moddate := fi.ModTime()
+    fmt.Println("Commit tag: ", fi.Name())
+    fmt.Println("Author: ", username)
+    fmt.Println("Time Stamp: ", moddate)
+    fmt.Println()
+  }
+}
 // Diff show difference between two versions
 func Diff() {}
 
