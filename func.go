@@ -11,6 +11,7 @@ import (
   "crypto/sha1"
   "io"
   "flag"
+  "github.com/udhos/equalfile"
 )
 
 func main() {
@@ -19,6 +20,7 @@ func main() {
   var commit string
   var status string
   var log string
+  var diff string
 
 	flag.StringVar(&init, "init", "", "initialize the repo")
   flag.StringVar(&init, "i", "", "initialize the repo (shorthand)")
@@ -34,6 +36,9 @@ func main() {
 
   flag.StringVar(&log, "log", "", "list all commits")
   flag.StringVar(&log, "l", "", "list all commits (shorthand)")
+
+  flag.StringVar(&diff, "diff", "", "overview of difference")
+  flag.StringVar(&diff, "d", "", "overview of difference (shorthand)")
     
 	
 	flag.Parse()
@@ -44,11 +49,13 @@ func main() {
     Commit(commit)
 	} else if add != "" {
     Add(add)
-  } else if status != "" {
-    Status()
-  } else if log != "" {
-    Log()
-  } 
+    } else if status != "" {
+        Status()
+    } else if log != "" {
+        Log()
+    } else if log != "" {
+        Diff(diff, diff)
+    } 
 }
 
 // Init initialize repository
@@ -363,8 +370,16 @@ func Log() {
     fmt.Println()
   }
 }
+
 // Diff show difference between two versions
-func Diff() {}
+func Diff(oldCommit string, newCommit string) bool {
+    oldFile, _ := filepath.Abs("dcrs/object/" + oldCommit)
+    newFile, _ := filepath.Abs("dcrs/object/" + newCommit)
+	cmp := equalfile.New(nil, equalfile.Options{})
+    equal, _ := cmp.CompareFile(oldFile, newFile)
+
+    return equal
+}
 
 // Status show project status
 func Status() {
