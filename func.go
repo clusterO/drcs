@@ -135,7 +135,7 @@ func Add(filename string) {
         line := scanner.Text()
         path := strings.Fields(line)
         
-			  if path[0] == p {
+		if path[0] == p {
           _, err := fo.WriteString(path[0] + " notcommited\n") 
           if err != nil {
             panic(err)
@@ -328,6 +328,7 @@ func Rename(directoryPath string, newName string) {
 
 // Clone a repository
 func Clone() {}
+
 // Log list all commits
 func Log() {
   path, err := os.Getwd()
@@ -410,5 +411,62 @@ func Status() {
 func Pull(url string) {}
 // Push changes to repository
 func Push(url string) {}
+
 // Revert changes
-func Revert(commitHash string) {}
+func Revert(commitHash string, hashMap string) {
+  path, err := os.Getwd()
+  if err != nil {
+    log.Println(err)
+  }
+
+  files, err := os.Open(path + "/dcrs/object/" + commitHash + "/" + hashMap)
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  defer files.Close()
+  scanner := bufio.NewScanner(files)
+
+  for scanner.Scan() {
+    /* line := scanner.Text()
+    p := strings.Fields(line)
+    filename := p[0] */
+
+    content := "" 
+    dumpFile, err := filepath.Abs("dump.txt")
+    fo, err := os.Create(dumpFile)
+      if err != nil {
+          panic(err)
+      }
+      
+      defer fo.Close()
+
+      _, err = fo.WriteString(content) 
+          if err != nil {
+            panic(err)
+          }
+
+        src := dumpFile
+      dst := path
+
+      _, err = os.Stat(src)
+      if err != nil {
+        return
+      }
+
+      source, err := os.Open(src)
+      if err != nil {
+        return
+      }
+
+      defer source.Close()
+
+      destination, err := os.Create(dst)
+      if err != nil {
+        return
+      }
+
+      defer destination.Close()
+      _, err = io.Copy(destination, source)
+  }          
+}
