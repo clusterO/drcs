@@ -494,3 +494,23 @@ func getFile(commitTag string, filename string) string {
     return ""
 }
 
+func getHashNameFromHashmap(hashfile string, name string) string {
+    files, err := os.Open(hashfile)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    defer files.Close()
+    scanner := bufio.NewScanner(files)
+
+    for scanner.Scan() { 
+        line := scanner.Text()
+        p := strings.Fields(line)
+        
+        if p[0] == name {
+            return p[1]
+        }
+    }
+
+    return ""
+}
