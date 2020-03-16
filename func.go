@@ -12,8 +12,6 @@ import (
   "io"
   "flag"
   "github.com/udhos/equalfile"
-  "compress/zlib"
-  "bytes"
 )
 
 func main() {
@@ -252,7 +250,7 @@ func Commit(message string) (int64, error) {
     line := scanner.Text()
     path := strings.Fields(line)
 
-    if(path[1] == "notcommited\n") {
+    if(path[1] == "notcommited\n" || path[1] == "commited\n") {
       src := path[0]
       p, err := filepath.Abs("dcrs")
       dst := p + "/object/" + string(hashmap)
@@ -434,7 +432,7 @@ func Revert(commitHash string, hashMap string) {
     p := strings.Fields(line)
     filename := p[0]
 
-    content := getFile(commitHash, filename)
+    content := GetFile(commitHash, filename)
     dumpFile, err := filepath.Abs("dump.txt")
     fo, err := os.Create(dumpFile)
       if err != nil {
@@ -473,44 +471,11 @@ func Revert(commitHash string, hashMap string) {
   }          
 }
 
-func getFile(commitTag string, filename string) string {
-    path, err := os.Getwd()
-    if err != nil {
-        log.Println(err)
-    }
+func merge(directory string) {
+  path, err := os.Getwd()
+  if err != nil {
+    log.Println(err)
+  }
 
-    files := filepath.Join(path, "/dcrs/object/", commitTag)
-    hashmap := filepath.Join(files, "hashmap")
-    h := getHashNameFromHashmap(hashmap, filename)
-    
-    var b bytes.Buffer
-    content := zlib.NewWriter(&b)
-    p := filepath.Join(files, h)
-    fmt.Println(p)
-    r, err := zlib.NewReader(&b)
-    io.Copy(content, r)
-    r.Close() 
-
-    return ""
-}
-
-func getHashNameFromHashmap(hashfile string, name string) string {
-    files, err := os.Open(hashfile)
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    defer files.Close()
-    scanner := bufio.NewScanner(files)
-
-    for scanner.Scan() { 
-        line := scanner.Text()
-        p := strings.Fields(line)
-        
-        if p[0] == name {
-            return p[1]
-        }
-    }
-
-    return ""
+  Dircmp(path, directory)
 }
