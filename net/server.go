@@ -1,4 +1,4 @@
-package dcrs
+package net
 
 import (
 	"fmt"
