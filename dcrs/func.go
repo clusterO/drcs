@@ -2,43 +2,51 @@ package dcrs
 
 import (
 	"fmt"
-  "os"
-  "log"
-  "path/filepath"
-  "bufio"
-  "strings"
-  "time"
-  "crypto/sha1"
-  "io"
-  "flag"
-  "equalfile"
+	"os"
+	"log"
+	"path/filepath"
+	"bufio"
+	"strings"
+	"time"
+	"crypto/sha1"
+	"io"
+	"flag"
+	"equalfile"
 )
 
 func main() {
-  var init string
-  var add string
-  var commit string
-  var status string
-  var log string
-  var diff string
+	var init string
+	var add string
+	var commit string
+	var status string
+	var log string
+	var diff string
+	var pull string 
+	var revert string 
 
 	flag.StringVar(&init, "init", "", "initialize the repo")
-  flag.StringVar(&init, "i", "", "initialize the repo (shorthand)")
+	flag.StringVar(&init, "i", "", "initialize the repo (shorthand)")
 
 	flag.StringVar(&add, "add", "", "add files")
-  flag.StringVar(&add, "a", "", "add files (shorthand)")
+	flag.StringVar(&add, "a", "", "add files (shorthand)")
 
-  flag.StringVar(&commit, "commit", "", "commit changes")
-  flag.StringVar(&commit, "c", "", "commit changes (shorthand)")
+	flag.StringVar(&commit, "commit", "", "commit changes")
+	flag.StringVar(&commit, "c", "", "commit changes (shorthand)")
 
-  flag.StringVar(&status, "status", "", "show status")
-  flag.StringVar(&status, "s", "", "show status (shorthand)")
+	flag.StringVar(&status, "status", "", "show status")
+	flag.StringVar(&status, "s", "", "show status (shorthand)")
 
-  flag.StringVar(&log, "log", "", "list all commits")
-  flag.StringVar(&log, "l", "", "list all commits (shorthand)")
+	flag.StringVar(&log, "log", "", "list all commits")
+	flag.StringVar(&log, "l", "", "list all commits (shorthand)")
 
-  flag.StringVar(&diff, "diff", "", "overview of difference")
-  flag.StringVar(&diff, "d", "", "overview of difference (shorthand)")
+	flag.StringVar(&diff, "diff", "", "overview of difference")
+	flag.StringVar(&diff, "d", "", "overview of difference (shorthand)")
+
+	flag.StringVar(&pull, "pull", "", "pull and merge commits and files")
+	flag.StringVar(&pull, "p", "", "pull and merge commits and files (shorthand)")
+
+	flag.StringVar(&revert, "revert", "", "revert current directory to an old commit")
+	flag.StringVar(&revert, "r", "", "revert current directory to an old commit (shorthand)")
     
 	
 	flag.Parse()
@@ -46,15 +54,19 @@ func main() {
 	if init != "" {
 		Init()
 	} else if commit != "" {
-    Commit(commit)
+    	Commit(commit)
 	} else if add != "" {
-    Add(add)
+    	Add(add)
     } else if status != "" {
         Status()
     } else if log != "" {
         Log()
     } else if log != "" {
         Diff(diff, diff)
+    } else if pull != "" {
+        Pull()
+    } else if revert != "" {
+        Revert()
     } 
 }
 
@@ -408,7 +420,10 @@ func Status() {
 }
 
 // Pull changes from repository
-func Pull(url string) {}
+func Pull(url string) {
+	Merge(url)
+}
+
 // Push changes to repository
 func Push(url string) {}
 
@@ -471,7 +486,8 @@ func Revert(commitHash string, hashMap string) {
   }          
 }
 
-func merge(directory string) {
+// Merge files
+func Merge(directory string) {
     commits := GetCommits(directory)
     print(commits)
     mycommits := GetAllCommits()
@@ -500,5 +516,51 @@ func merge(directory string) {
       if _, err := f.WriteString(commitsToFetch[i] + "\n"); err != nil {
         log.Println(err)
       }
-    }
+	}
+  
+	parentCommit := ""
+	for i := 0; i < len(commits); i++ {
+		for _, v := range mycommits {
+			if v == commits[i] {
+			parentCommit := commits[i]
+			}
+		}
+	}
+
+  	parentFileList := GetFileList(strings.Fields(parentCommit)[1])
+	myFileList := GetFileList(strings.Fields(mycommits[0])[1])
+	otherFileList := GetFileList(strings.Fields(commits[0])[1])
+  	flag := 0
+  
+	for elem := range myFileList {
+		for temp := range otherFileList {
+			if myFileList[elem] == otherFileList[temp] {
+				dicts := MergeMethod(GetFile(strings.Fields(parentCommit)[1], myFileList[elem]), GetFile(strings.Fields(mycommits[0])[1], myFileList[elem]), GetFile(strings.Fields(commits[0])[1], myFileList[elem]))
+				
+				fo, err := os.Create(path + "/dcrs/" + myFileList[elem])
+				if err != nil {
+					panic(err)
+				}
+
+				defer fo.Close()
+		
+				_, err = fo.WriteString(dicts.mdContent) 
+				if err != nil {
+					panic(err)
+				}
+
+				if dicts.conflict == 0 && dicts.merged != 0 {
+					print("Merged "+ myFileList[elem] + "\n")
+				} else {
+					print("Merged with conflicts in " + myFileList[elem] + " not commiting.Please commit after manually changing")
+					flag=1
+				}
+			}
+    	}
+	  
+	}
+
+	if(flag == 0) {
+		Commit("auto-merged successfull")
+	}
 }
