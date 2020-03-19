@@ -48,21 +48,25 @@ func main() {
 	flag.StringVar(&revert, "revert", "", "revert current directory to an old commit")
 	flag.StringVar(&revert, "r", "", "revert current directory to an old commit (shorthand)")
     
+	path, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
 	
 	flag.Parse()
 
 	if init != "" {
-		Init()
+		Init(path)
 	} else if commit != "" {
     	Commit(commit)
 	} else if add != "" {
-    	Add(add)
+    	Add(add, path)
     } else if status != "" {
-        Status()
+        Status(path)
     } else if log != "" {
-        Log()
+        Log(path)
     } else if log != "" {
-        Diff(diff, diff)
+        Diff(diff, diff, path)
     } else if pull != "" {
         Pull()
     } else if revert != "" {
@@ -71,49 +75,39 @@ func main() {
 }
 
 // Init initialize repository
-func Init() {
-  path, err := os.Getwd()
-  if err != nil {
-    log.Println(err)
-  }
-
+func Init(path string) {
 	err = os.MkdirAll(path + "/dcrs", os.ModePerm)
 	if err != nil {
     log.Fatal(err)
-  }
-  
-  var username string
-  println("enter username: ")
-  fmt.Scan("%s", &username)
+	}
+	
+	var username string
+	println("enter username: ")
+	fmt.Scan("%s", &username)
 
-  config, err := os.Create(path + "/dcrs/" + "config.txt")
-  if err != nil {
-      panic(err)
-  }
-      
-  defer config.Close()
+	config, err := os.Create(path + "/dcrs/" + "config.txt")
+	if err != nil {
+		panic(err)
+	}
+		
+	defer config.Close()
 
-  _, err = config.WriteString(username) 
-      if err != nil {
-        panic(err)
-      }
+	_, err = config.WriteString(username) 
+		if err != nil {
+			panic(err)
+		}
 
-  files, err := os.Create(path + "/dcrs/" + "files.txt")
-  if err != nil {
-      panic(err)
-  }
-      
-  defer files.Close()
+	files, err := os.Create(path + "/dcrs/" + "files.txt")
+	if err != nil {
+		panic(err)
+	}
+		
+	defer files.Close()
 }
 
 // Add files to tracking system
-func Add(filename string) {
+func Add(filename string, path string) {
   var list []string
-
-  path, err := os.Getwd()
-  if err != nil {
-    log.Println(err)
-  }
 
   file, err := os.Stat(filename)
   if err != nil {
@@ -230,12 +224,7 @@ func Add(filename string) {
 }
 
 // Commit changes
-func Commit(message string) (int64, error) {
-  path, err := os.Getwd()
-  if err != nil {
-    log.Println(err)
-  }
-
+func Commit(message string, path string) (int64, error) {
   files, err := os.Open(path + "/dcrs/" + "config.txt")
   if err != nil {
     log.Fatal(err)
@@ -342,12 +331,7 @@ func Rename(directoryPath string, newName string) {
 func Clone() {}
 
 // Log list all commits
-func Log() {
-  path, err := os.Getwd()
-  if err != nil {
-    log.Println(err)
-  }
-
+func Log(path string) {
   files, err := os.Open(path + "/dcrs/" + "config.txt")
   if err != nil {
     log.Fatal(err)
@@ -395,12 +379,7 @@ func Diff(oldCommit string, newCommit string) bool {
 }
 
 // Status show project status
-func Status() {
-  path, err := os.Getwd()
-  if err != nil {
-    log.Println(err)
-  }
-
+func Status(path string) {
   files, err := os.Open(path + "/dcrs/" + "files.txt")
   if err != nil {
     log.Fatal(err)
@@ -428,12 +407,7 @@ func Pull(url string) {
 func Push(url string) {}
 
 // Revert changes
-func Revert(commitHash string, hashMap string) {
-  path, err := os.Getwd()
-  if err != nil {
-    log.Println(err)
-  }
-
+func Revert(commitHash string, hashMap string, string path) {
   files, err := os.Open(path + "/dcrs/object/" + commitHash + "/" + hashMap)
   if err != nil {
     log.Fatal(err)
