@@ -81,9 +81,12 @@ func Init(path string) {
     log.Fatal(err)
 	}
 	
-	var username string
+	var username string 
+	var email string 
 	println("enter username: ")
 	fmt.Scan("%s", &username)
+	println("enter email: ")
+	fmt.Scan("%s", &email)
 
 	config, err := os.Create(path + "/dcrs/" + "config.txt")
 	if err != nil {
