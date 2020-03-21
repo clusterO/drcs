@@ -14,7 +14,7 @@ import (
 	"equalfile"
 )
 
-func main() {
+func main(dirc string) {
 	var init string
 	var add string
 	var commit string
@@ -52,6 +52,15 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	}
+
+	directory := dirc
+	statusfile := filepath.Abs(filepath.Join(directory, "dcrs","status.txt"))
+	userfile := filepath.Abs(filepath.Join(directory,"dcrs","username.txt"))
+	trackingfile := filepath.Abs(filepath.Join(directory,"dcrs","files.txt"))
+	objectdir := filepath.Abs(filepath.Join(directory,"dcrs","object"))
+	dcrs := filepath.Abs(filepath.Join(directory,"dcrs"))
+	newhashmap := "hashmap.txt"
+	commitfiles := filepath.Abs(filepath.Join(directory,"dcrs","object","commitfiles"))
 	
 	flag.Parse()
 
