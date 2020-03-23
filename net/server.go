@@ -8,17 +8,6 @@ import (
 	"dcrs/dcrs"
 )
 
-func dial() {
-	conn, err := net.Dial("tcp", "127.0.0.1:8787")
-	if err != nil {
-		fmt.Print("error: ", err)
-	}
-
-	fmt.Fprintf(conn, "GET / HTTP/1.0\r\n\r\n")
-	status, err := bufio.NewReader(conn).ReadString('\n')
-	fmt.Print("status: ", status)
-}
-
 func listen() {
 	ln, err := net.Listen("tcp", ":9999")
 	if err != nil {
@@ -30,6 +19,7 @@ func listen() {
 		if err != nil {
 		fmt.Print("error: ", err)
 		}
+		
 		go handleConnection(conn)
 	}
 }
