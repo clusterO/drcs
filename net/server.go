@@ -1,11 +1,10 @@
 package net
 
 import (
-	"fmt"
-	"net"
-	"bufio"
-	"io"
 	"dcrs/dcrs"
+	"fmt"
+	"io"
+	"net"
 )
 
 func listen() {
@@ -17,19 +16,19 @@ func listen() {
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-		fmt.Print("error: ", err)
+			fmt.Print("error: ", err)
 		}
-		
+
 		go handleConnection(conn)
 	}
 }
 
 func remoteGetCommits(directory string) {
-  	return GetAllCommits()
+	return dcrs.GetAllCommits()
 }
 
 func remoteGetCommitsContent(directory string, commit string) {
-  	return CompressAndSend()
+	return dcrs.CompressAndSend()
 }
 
 func handleConnection(c net.Conn) {

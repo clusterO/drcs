@@ -150,12 +150,10 @@ func CompressAndSend(commit string) string {
 		log.Println(err)
 	}
 
-	tempdir, err := ioutil.TempDir("", "tempdir")
-	archivename := filepath.Join(tempdir, commit + ".zip")
-	zip.RecursiveZip(filepath.Join(path, commit), archivename)
+	archivename := CompressAll(commit)
 
 	files, err := os.Open(archivename)
-	if err != nil {
+	if err != nil {	
 		log.Fatal(err)
 	}
 
@@ -169,6 +167,57 @@ func CompressAndSend(commit string) string {
 	}
 
 	return content
+}
+
+// CompressAll recursively zip all files
+func CompressAll(commits string, commitDir string) {
+	tempdir, err := ioutil.TempDir("", "tempdir")
+	commitdir := filepath.Join(tempdir, commitDir)
+
+	err := os.Mkdir(commitdir); err {
+		log.Fatal(err)
+	}
+
+	archivename := filepath.Join(tempdir, commit + ".zip")
+
+	file, err := os.Stat(archivename)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	
+	switch mode := file.Mode(); {
+		case !mode.IsRegular():
+			fp, err := os.Create(archivename)
+			if err != nil {
+				panic(err)
+			}
+				
+			defer fp.Close()
+	
+			_, err = fp.WriteString(content) 
+			if err != nil {
+				panic(err)
+			}
+	}
+
+	extractto := filepath.Join(objectdir, commit)
+	os.MkdirAll(extractto)
+	zip.Unzip(extractto, archivename)
+
+	for i := range commits {
+		filenames = GetFileName(i)
+		_, err = io.Copy(filepath.Join(objectdir,i), tempdir)
+
+		for fn := range filenames {
+			h = GetFileLoc(i, fn)
+			floc = filepath.Join(commitfiles, h)
+			_, err = io.Copy(floc, commitdir)
+		}
+	}
+
+	archivename = ioutil.TempFile("", ".zip")
+	zip.RecursiveZip(tempdir, archivename)
 }
 
 // UncompressAndWrite extract content
