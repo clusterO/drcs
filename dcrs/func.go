@@ -59,7 +59,7 @@ func main(dirc string) {
 	trackingfile := filepath.Abs(filepath.Join(directory, "dcrs", "files.txt"))
 	objectdir := filepath.Abs(filepath.Join(directory, "dcrs", "object"))
 	dcrs := filepath.Abs(filepath.Join(directory, "dcrs"))
-	newhashmap := "hashmap.txt"
+	hashmap := filepath.Abs(filepath.Join(directory, "dcrs", "object", "commitfiles"))
 	commitfiles := filepath.Abs(filepath.Join(directory, "dcrs", "object", "commitfiles"))
 
 	flag.Parse()
@@ -233,6 +233,8 @@ func Add(filename string, path string) {
 			}
 		}
 	}
+
+	UpdateModifyTime()
 }
 
 // Commit changes
@@ -321,6 +323,7 @@ func Commit(message string, path string) (int64, error) {
 		}
 	}
 
+	UpdateModifyTime()
 	return 0, nil
 }
 

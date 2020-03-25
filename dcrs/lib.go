@@ -67,7 +67,7 @@ type Fileattr struct {
 
 var leftList []Fileattr
 var rightList []Fileattr
-
+ 
 // Dircmp compare two direcotories
 func Dircmp(leftDir string, rightDir string) {
 	filepath.Walk(leftDir, LeftVisit)
@@ -318,6 +318,7 @@ type Data struct {
 
 // MergeMethod use 3 base method to merge files
 func MergeMethod(base string, mine string, other string) Data {
+	print(base,"\n", mine, "\n", other, "\n")
     m := Merge(base, mine, other)
     mg := m.merge_groups()
     conflicts := 0
@@ -373,9 +374,40 @@ func GetFileLoc(objectdir string, commitTag string, filename string) {
 		line := scanner.Text()
 		p := strings.Fields(line)
 
-		if p[1] == filename:
+		if p[1] == filename {
 			return p[0]
+		}
 	}
 
 	return nil
+}
+
+func UpdateModifyTime(trackingFile string) {
+	files, err := os.Open(trackingfile)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    defer files.Close()
+	scanner := bufio.NewScanner(files)
+
+	fp, err := os.Create(trackingfile)
+	if err != nil {
+		panic(err)
+	}
+		
+	defer fp.Close()
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		p := strings.Fields(line)
+
+		name = p[0]
+		status = p[1]
+
+		_, err = fp.WriteString(name + " " + status + " " + time.Now().String() + "\n") 
+		if err != nil {
+			panic(err)
+		}
+	}
 }
