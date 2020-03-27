@@ -1,4 +1,4 @@
-package net
+package network
 
 import (
 	"bufio"
@@ -6,21 +6,25 @@ import (
 	"net"
 )
 
-func getVersions(result string) {
+func GetVersions(result string) {
 	// remote callback
 }
 
-func gotVersions(result string) {
+func GotVersions(result string) {
 	print("server: ", result)
 }
 
-func dial() {
-	conn, err := net.Dial("tcp", "127.0.0.1:9999")
+func Dial(ip string, port string) {
+	conn, err := net.Dial("tcp", ip+":"+port)
 	if err != nil {
 		fmt.Print("error: ", err)
 	}
 
 	fmt.Fprintf(conn, "GET / HTTP/1.0\r\n\r\n")
-	status, err := bufio.NewReader(conn).ReadString('\n')
+	status, err = bufio.NewReader(conn).ReadString('\n')
 	fmt.Print("status: ", status)
+}
+
+func Connect(ip string, port string, direcotry string, op bool) {
+
 }

@@ -22,7 +22,9 @@ func main(dirc string) {
 	var log string
 	var diff string
 	var pull string
-	var revert string
+	var pushrevert string
+	var push string
+	var clone string
 
 	flag.StringVar(&init, "init", "", "initialize the repo")
 	flag.StringVar(&init, "i", "", "initialize the repo (shorthand)")
@@ -47,6 +49,12 @@ func main(dirc string) {
 
 	flag.StringVar(&revert, "revert", "", "revert current directory to an old commit")
 	flag.StringVar(&revert, "r", "", "revert current directory to an old commit (shorthand)")
+
+	flag.StringVar(&push, "push", "", "pushes the commits")
+	flag.StringVar(&push, "ps", "", "pushes the commits (shorthand)")
+
+	flag.StringVar(&clone, "clone", "", "clone remote repository")
+	flag.StringVar(&clone, "c", "", "clone remote repository (shorthand)")
 
 	path, err := os.Getwd()
 	if err != nil {
@@ -80,6 +88,10 @@ func main(dirc string) {
 		Pull()
 	} else if revert != "" {
 		Revert()
+	} else if push != "" {
+		Push()
+	} else if clone != "" {
+		Clone(clone)
 	}
 }
 
@@ -265,7 +277,7 @@ func Commit(message string, path string) (int64, error) {
 		line := scanner.Text()
 		path := strings.Fields(line)
 
-		if path[1] == "notcommited\n" || path[1] == "commited\n" {
+		if path[1] == "notcommited" || path[1] == "commited" {
 			src := path[0]
 			p, err := filepath.Abs("dcrs")
 			dst := p + "/object/" + string(hashmap)
@@ -342,7 +354,11 @@ func Rename(directoryPath string, newName string) {
 }
 
 // Clone a repository
-func Clone() {}
+func Clone(target string) {
+	directory := filepath.Base(target)
+	Init("")
+	Pull(target)
+}
 
 // Log list all commits
 func Log(path string) {
@@ -406,7 +422,7 @@ func Status(path string) {
 		line := scanner.Text()
 		path := strings.Fields(line)
 
-		if path[1] == "notcommited\n" {
+		if path[1] == "notcommited" {
 			fmt.Println(line)
 		}
 	}
@@ -414,11 +430,19 @@ func Status(path string) {
 
 // Pull changes from repository
 func Pull(url string) {
-	Merge(url)
+	ip := surl.split(":")[0]
+	port := int(url.split(":")[1].split("/")[0])
+	directory := url.split(":")[1][4:len(url)]
+	Connect(ip, port, directory, true)
 }
 
 // Push changes to repository
-func Push(url string) {}
+func Push(url string) {
+	ip := url.split(":")[0]
+	port := int(url.split(":")[1].split("/")[0])
+	directory = url.split(":")[1][4:len(url)]
+	Connect(ip, port, directory, false)
+}
 
 // Revert changes
 func Revert(commitHash string, hashMap string, string path) {
