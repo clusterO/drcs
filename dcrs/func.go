@@ -561,12 +561,30 @@ func Merge(directory string) {
 					panic(err)
 				}
 
-				if dicts.conflict == 0 && dicts.merged != 0 {
-					print("Merged " + myFileList[elem] + "\n")
-				} else {
+				Add(myFileList[elem])
+
+				if dicts.conflict == 1 {
 					print("Merged with conflicts in " + myFileList[elem] + " not commiting.Please commit after manually changing")
 					flag = 1
+				} else {
+					print("Merged " + myFileList[elem] + " successfully\n")
 				}
+			} else {
+				files, err := os.Create(myFileList[elem])
+				if err != nil {
+					panic(err)
+				}
+
+				defer files.Close()
+
+				content := GetFile((commits), myFileList[elem])
+
+				_, err = files.WriteString(content)
+				if err != nil {
+					panic(err)
+				}
+
+				Add(myFileList[elem])
 			}
 		}
 
