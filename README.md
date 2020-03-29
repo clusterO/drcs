@@ -1,4 +1,7 @@
-## DCRS
+This project try to implement DRCS & DDS systems in golang, the goal after reaching a stable 
+implementation is to benchmark these systems with similar ones implemented with other languages.
+
+### DRCS : Distributed Revision Control System 
 
 Track software revisions and allow different networks to share work on a project.
 dcrs use peer to peer approach, each peer has a working copy of the codebase, copies
@@ -22,3 +25,10 @@ between the peers, and the crs.
 * https://github.com/udhos/equalfile
 * https://github.com/charlesvdv/go-three-way-merge
 
+### DDS : Dynamic Deployment System
+
+A tool for automated deployment and build.
+
+#### refs
+
+* https://www.wikiwand.com/en/Software_deployment
