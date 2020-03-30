@@ -3,6 +3,7 @@ package dcrs
 import (
 	"bufio"
 	"crypto/sha1"
+	network "dcrs/net"
 	"equalfile"
 	"flag"
 	"fmt"
@@ -19,10 +20,10 @@ func main(dirc string) {
 	var add string
 	var commit string
 	var status string
-	var log string
+	var logging string
 	var diff string
 	var pull string
-	var pushrevert string
+	var revert string
 	var push string
 	var clone string
 
@@ -38,8 +39,8 @@ func main(dirc string) {
 	flag.StringVar(&status, "status", "", "show status")
 	flag.StringVar(&status, "s", "", "show status (shorthand)")
 
-	flag.StringVar(&log, "log", "", "list all commits")
-	flag.StringVar(&log, "l", "", "list all commits (shorthand)")
+	flag.StringVar(&logging, "log", "", "list all commits")
+	flag.StringVar(&logging, "l", "", "list all commits (shorthand)")
 
 	flag.StringVar(&diff, "diff", "", "overview of difference")
 	flag.StringVar(&diff, "d", "", "overview of difference (shorthand)")
@@ -58,38 +59,38 @@ func main(dirc string) {
 
 	path, err := os.Getwd()
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 
 	directory := dirc
-	statusfile := filepath.Abs(filepath.Join(directory, "dcrs", "status.txt"))
-	userfile := filepath.Abs(filepath.Join(directory, "dcrs", "username.txt"))
-	trackingfile := filepath.Abs(filepath.Join(directory, "dcrs", "files.txt"))
-	objectdir := filepath.Abs(filepath.Join(directory, "dcrs", "object"))
-	dcrs := filepath.Abs(filepath.Join(directory, "dcrs"))
-	hashmap := filepath.Abs(filepath.Join(directory, "dcrs", "object", "commitfiles"))
-	commitfiles := filepath.Abs(filepath.Join(directory, "dcrs", "object", "commitfiles"))
+	statusfile, _ := filepath.Abs(filepath.Join(directory, "dcrs", "status.txt"))
+	userfile, _  := filepath.Abs(filepath.Join(directory, "dcrs", "username.txt"))
+	trackingfile, _ := filepath.Abs(filepath.Join(directory, "dcrs", "files.txt"))
+	objectdir, _  := filepath.Abs(filepath.Join(directory, "dcrs", "object"))
+	dcrs, _  := filepath.Abs(filepath.Join(directory, "dcrs"))
+	hashmap, _  := filepath.Abs(filepath.Join(directory, "dcrs", "object", "commitfiles"))
+	commitfiles, _  := filepath.Abs(filepath.Join(directory, "dcrs", "object", "commitfiles"))
 
 	flag.Parse()
 
 	if init != "" {
-		Init(path)
+		Init(userfile)
 	} else if commit != "" {
-		Commit(commit)
+		Commit(commit, trackingfile)
 	} else if add != "" {
 		Add(add, path)
 	} else if status != "" {
-		Status(path)
-	} else if log != "" {
+		Status(statusfile)
+	} else if logging != "" {
 		Log(path)
-	} else if log != "" {
-		Diff(diff, diff, path)
+	} else if diff != "" {
+		Diff(diff, path)
 	} else if pull != "" {
-		Pull()
+		Pull(objectdir)
 	} else if revert != "" {
-		Revert()
+		Revert(dcrs, hashmap, path)
 	} else if push != "" {
-		Push()
+		Push(commitfiles)
 	} else if clone != "" {
 		Clone(clone)
 	}
@@ -97,7 +98,7 @@ func main(dirc string) {
 
 // Init initialize repository
 func Init(path string) {
-	err = os.MkdirAll(path+"/dcrs", os.ModePerm)
+	err := os.MkdirAll(path+"/dcrs", os.ModePerm)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -241,12 +242,12 @@ func Add(filename string, path string) {
 					log.Fatal(err)
 				}
 			case mode.IsDir():
-				Add(f)
+				Add(f, path)
 			}
 		}
 	}
 
-	UpdateModifyTime()
+	UpdateModifyTime("")
 }
 
 // Commit changes
@@ -335,7 +336,7 @@ func Commit(message string, path string) (int64, error) {
 		}
 	}
 
-	UpdateModifyTime()
+	UpdateModifyTime("")
 	return 0, nil
 }
 
@@ -356,7 +357,7 @@ func Rename(directoryPath string, newName string) {
 // Clone a repository
 func Clone(target string) {
 	directory := filepath.Base(target)
-	Init("")
+	Init(directory)
 	Pull(target)
 }
 
@@ -430,22 +431,22 @@ func Status(path string) {
 
 // Pull changes from repository
 func Pull(url string) {
-	ip := surl.split(":")[0]
-	port := int(url.split(":")[1].split("/")[0])
-	directory := url.split(":")[1][4:len(url)]
-	Connect(ip, port, directory, true)
+	ip := strings.Split(url, ":")[0]
+	port := strings.Split(strings.Split(url, ":")[1], "/")[0]
+	directory := strings.Split(url, ":")[1][4:len(url)]
+	network.Connect(ip, port, directory, true)
 }
 
 // Push changes to repository
 func Push(url string) {
-	ip := url.split(":")[0]
-	port := int(url.split(":")[1].split("/")[0])
-	directory = url.split(":")[1][4:len(url)]
-	Connect(ip, port, directory, false)
+	ip := strings.Split(url, ":")[0]
+	port := strings.Split(strings.Split(url, ":")[1], "/")[0]
+	directory := strings.Split(url, ":")[1][4:len(url)]
+	network.Connect(ip, port, directory, false)
 }
 
 // Revert changes
-func Revert(commitHash string, hashMap string, string path) {
+func Revert(commitHash string, hashMap string, path string) {
 	files, err := os.Open(path + "/dcrs/object/" + commitHash + "/" + hashMap)
 	if err != nil {
 		log.Fatal(err)
@@ -534,12 +535,12 @@ func Merge(directory string) {
 	for i := 0; i < len(commits); i++ {
 		for _, v := range mycommits {
 			if v == commits[i] {
-				parentCommit := commits[i]
+				parentCommit = commits[i]
 			}
 		}
 	}
 
-	parentFileList := GetFileList(strings.Fields(parentCommit)[1])
+	// parentFileList := GetFileList(strings.Fields(parentCommit)[1])
 	myFileList := GetFileList(strings.Fields(mycommits[0])[1])
 	otherFileList := GetFileList(strings.Fields(commits[0])[1])
 	flag := 0
@@ -561,7 +562,7 @@ func Merge(directory string) {
 					panic(err)
 				}
 
-				Add(myFileList[elem])
+				Add(myFileList[elem], path)
 
 				if dicts.conflict == 1 {
 					print("Merged with conflicts in " + myFileList[elem] + " not commiting.Please commit after manually changing")
@@ -577,20 +578,20 @@ func Merge(directory string) {
 
 				defer files.Close()
 
-				content := GetFile((commits), myFileList[elem])
+				content := GetFile(commits[0], myFileList[elem])
 
 				_, err = files.WriteString(content)
 				if err != nil {
 					panic(err)
 				}
 
-				Add(myFileList[elem])
+				Add(myFileList[elem], path)
 			}
 		}
 
 	}
 
 	if flag == 0 {
-		Commit("auto-merged successfull")
+		Commit("auto-merged successfull", path)
 	}
 }

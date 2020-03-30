@@ -15,13 +15,13 @@ func GotVersions(result string) {
 }
 
 func Dial(ip string, port string) {
-	conn, err := net.Dial("tcp", ip+":"+port)
+	conn, err := net.Dial("tcp", ip + ":" + port)
 	if err != nil {
 		fmt.Print("error: ", err)
 	}
 
 	fmt.Fprintf(conn, "GET / HTTP/1.0\r\n\r\n")
-	status, err = bufio.NewReader(conn).ReadString('\n')
+	status, err := bufio.NewReader(conn).ReadString('\n')
 	fmt.Print("status: ", status)
 }
 
