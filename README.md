@@ -34,11 +34,11 @@ A tool for automated deployment and build.
 * https://www.wikiwand.com/en/Software_deployment
 
 ###### TODO
-* [] Refactor
-* [] Unit tests
-* [] Add only modified files
-* [] Store SHA1 as tree
-* [] Add manual conflicts resolution
-* [] Implement network connect
-* [] Store files as blobs
-* [] Implement branches & branches merging
+* [ ] Refactor
+* [ ] Unit tests
+* [ ] Add only modified files
+* [ ] Store SHA1 as tree
+* [ ] Add manual conflicts resolution
+* [ ] Implement network connect
+* [ ] Store files as blobs
+* [ ] Implement branches & branches merging
