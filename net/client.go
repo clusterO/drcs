@@ -15,8 +15,7 @@ func GotVersions(result string) {
 }
 
 func Dial(ip string, port string) {
-	conn, err := net.Dial("tcp", ip + ":" + port)
-	if err != nil {
+	conn, err := net.Dial("tcp", ip + ":" + port); if err != nil {
 		fmt.Print("error: ", err)
 	}
 
